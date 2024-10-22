@@ -1,15 +1,22 @@
 steps:
 - name: 'gcr.io/cloud-builders/docker'
-  script: |
-    docker build -t us-east1-docker.pkg.dev/csci-5410-439301/serverless-frontend/qdp:latest ./frontend
+  args:
+    - 'build'
+    - '-t'
+    - 'us-east1-docker.pkg.dev/csci-5410-439301/serverless-frontend/qdp:latest'
+    - '-f'
+    - './frontend/Dockerfile'
+    - './frontend'
+
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['push', us-east1-docker.pkg.dev/csci-5410-439301/serverless-frontend/qdp:latest]
+  args: ['push', 'us-east1-docker.pkg.dev/csci-5410-439301/serverless-frontend/qdp:latest']
+
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: gcloud
   args:
   - 'run'
   - 'deploy'
-  - 'serverless-sdp7-gitlab'
+  - 'csci5410-project-frontend'
   - '--image'
   - 'us-east1-docker.pkg.dev/csci-5410-439301/serverless-frontend/qdp:latest'
   - '--region'
@@ -18,7 +25,9 @@ steps:
   - '--min-instances=1'
   - '--allow-unauthenticated'
   - '--port=3000'
+  
 images:
 - 'us-east1-docker.pkg.dev/csci-5410-439301/serverless-frontend/qdp:latest'
+
 options:
   logging: CLOUD_LOGGING_ONLY
