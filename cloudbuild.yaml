@@ -16,7 +16,7 @@ steps:
   args:
   - 'run'
   - 'deploy'
-  - 'csci5410-project-frontend'
+  - 'serverless-sdp7-gitlab'
   - '--image'
   - 'us-east1-docker.pkg.dev/csci-5410-439301/serverless-frontend/qdp:latest'
   - '--region'
