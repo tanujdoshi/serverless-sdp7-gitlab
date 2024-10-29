@@ -4,6 +4,7 @@ import { AppBar, Toolbar, Button } from "@mui/material";
 import Home from "./Components/Home/Home";
 import Login from "./Components/Authentication/Login/Login";
 import SignUp from "./Components/Authentication/Register/Register";
+import JsonToCsvProcessor from "./Components/DataProcessing/JsonToCsvProcessor";
 
 function App() {
   return (
@@ -19,12 +20,17 @@ function App() {
           <Button color="inherit" component={Link} to="/signup">
             Sign Up
           </Button>
+
+          <Button color="inherit" component={Link} to="/glue-process">
+            Process File
+          </Button>
         </Toolbar>
       </AppBar>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/glue-process" element={<JsonToCsvProcessor />} />
       </Routes>
     </Router>
   );
