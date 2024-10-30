@@ -1,138 +1,136 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { TextField, Button, Container, Typography } from "@mui/material";
-import AWS from 'aws-sdk';
+import {
+  Grid,
+  Button,
+  Container,
+  Typography,
+  Stepper,
+  Step,
+  StepLabel,
+  Paper,
+} from "@mui/material";
+import AWS from "aws-sdk";
+import StepOne from "./StepOne";
+import StepTwo from "./StepTwo";
+import StepThree from "./StepThree";
 
 const cognito = new AWS.CognitoIdentityServiceProvider({
-  region: 'us-east-1', 
-  apiVersion: '2016-04-18',
+  region: "us-east-1",
+  apiVersion: "2016-04-18",
 });
 
-
-
 function SignUp() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [securityQuestion1, setSecurityQuestion1] = useState('');
-  const [securityAnswer1, setSecurityAnswer1] = useState('');
-  const [securityQuestion2, setSecurityQuestion2] = useState('');
-  const [securityAnswer2, setSecurityAnswer2] = useState('');
+  const steps = ["Personal Details", "Security Quesiton", "Math"];
 
-const handleSubmit = (e) => {
-  e.preventDefault();
-  signUpUser(email, password);
-};
+  const [step, setStep] = useState(1);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    role: "",
+    securityQuestion1: "",
+    securityAnswer1: "",
+    captchaAnswer: "",
+  });
 
-const signUpUser = async (email, password) => {
-  console.log(email, password); 
-  const params = {
-    ClientId: process.env.COGNITO_CLIENT_ID,
-    Username: email,
-    Password: password,
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  try {
-    console.log("Signing up user");
-    const result = await cognito.signUp(params).promise();
-    console.log(result);
-    const params1 = {
-      TableName: 'UserSecurityQuestions',
-      Item: {
-        userId: email,
-        question1: securityQuestion1,
-        answer1: securityAnswer1,
-        question2: securityQuestion2,
-        answer2: securityAnswer2,
-      },
-    };
-
-    try{
-      console.log("Saving security questions");
-      const uploadResponse = await axios.post('https://fsywgygjrg.execute-api.us-east-1.amazonaws.com/dev/signup', {
-        userId: email,
-        question1: securityQuestion1,
-        answer1: securityAnswer1,
-        question2: securityQuestion2,
-        answer2: securityAnswer2,
-      });
-      console.log(uploadResponse);
-    }catch(err){
-      console.error("Error in saving security questions",err);
+  const handleBack = () => {
+    if (step > 1) {
+      setStep((prevStep) => prevStep - 1);
     }
-  } catch (error) {
-    console.log("Error in signUpUser", error);
-    console.error(error);
-  }
-};
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (step === 3) {
+      console.log("Form submitted:", formData);
+
+      const params = {
+        ClientId: "1748924r31pesr34u1sm5nb0bj",
+        Username: formData.email,
+        Password: formData.password,
+      };
+
+      await cognito.signUp(params).promise();
+
+      // TDO - need to add name, and role of user to DB
+      const uploadResponse = await axios.post(
+        "https://fsywgygjrg.execute-api.us-east-1.amazonaws.com/dev/signup",
+        {
+          userId: formData.email,
+          question1: formData.securityQuestion1,
+          answer1: formData.securityAnswer1,
+          question2: "",
+          answer2: "",
+        }
+      );
+      console.log(uploadResponse);
+    } else {
+      setStep((prevStep) => prevStep + 1);
+    }
+  };
+
+  const renderStepContent = () => {
+    switch (step) {
+      case 1:
+        return <StepOne formData={formData} handleChange={handleChange} />;
+      case 2:
+        return <StepTwo formData={formData} handleChange={handleChange} />;
+      case 3:
+        return <StepThree formData={formData} handleChange={handleChange} />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <Container maxWidth="sm">
-      <Typography variant="h4" gutterBottom>
-        Sign Up
-      </Typography>
-      <form onSubmit={handleSubmit}>
-        <TextField label="Name" fullWidth margin="normal" required />
-        <TextField
-          label="Email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          fullWidth
-          margin="normal"
-          required
-        />
-        <TextField
-          label="Password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          fullWidth
-          margin="normal"
-          required
-        />
-        <TextField
-          label="Confirm Password"
-          type="password"
-          fullWidth
-          margin="normal"
-          required
-        />
-        <TextField
-          label="Security Question 1"
-          value={securityQuestion1}
-          onChange={(e) => setSecurityQuestion1(e.target.value)}
-          fullWidth
-          margin="normal"
-          required
-        />
-        <TextField
-          label="Security Answer 1"
-          value={securityAnswer1}
-          onChange={(e) => setSecurityAnswer1(e.target.value)}
-          fullWidth
-          margin="normal"
-          required
-        />
-        <TextField
-          label="Security Question 2"
-          value={securityQuestion2}
-          onChange={(e) => setSecurityQuestion2(e.target.value)}
-          fullWidth
-          margin="normal"
-          required
-        />
-        <TextField
-          label="Security Answer 2"
-          value={securityAnswer2}
-          onChange={(e) => setSecurityAnswer2(e.target.value)}
-          fullWidth
-          margin="normal"
-          required
-        />
-        <Button variant="contained" color="primary" type="submit" fullWidth>
-          Sign Up
-        </Button>
-      </form>
+      <Stepper
+        activeStep={step - 1}
+        alternativeLabel
+        sx={{ marginBottom: 4, marginTop: 4 }}
+      >
+        {steps.map((label) => (
+          <Step key={label}>
+            <StepLabel>{label}</StepLabel>
+          </Step>
+        ))}
+      </Stepper>
+
+      <Paper elevation={3} sx={{ padding: 3, borderRadius: 2 }}>
+        <form onSubmit={handleSubmit}>
+          <Grid container spacing={2}>
+            {renderStepContent()}
+
+            <Grid
+              item
+              xs={12}
+              sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}
+            >
+              {step > 1 && (
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  onClick={handleBack}
+                >
+                  Back
+                </Button>
+              )}
+              <Button variant="contained" color="primary" type="submit">
+                {step === steps.length ? "Sign Up" : "Next"}
+              </Button>
+            </Grid>
+          </Grid>
+        </form>
+      </Paper>
     </Container>
   );
 }
