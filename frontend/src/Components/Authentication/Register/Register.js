@@ -61,6 +61,12 @@ function SignUp() {
 
       await cognito.signUp(params).promise();
 
+      console.log("User signed up");
+      // Call backend API to verify the user
+      const verifyRes = await axios.post("https://fsywgygjrg.execute-api.us-east-1.amazonaws.com/dev/signup/verify", {
+        email: formData.email
+      });
+
       // TDO - need to add name, and role of user to DB
       const uploadResponse = await axios.post(
         "https://fsywgygjrg.execute-api.us-east-1.amazonaws.com/dev/signup",
@@ -68,8 +74,8 @@ function SignUp() {
           userId: formData.email,
           question1: formData.securityQuestion1,
           answer1: formData.securityAnswer1,
-          question2: "",
-          answer2: "",
+          name: formData.name,
+          role: formData.role,
         }
       );
       console.log(uploadResponse);
