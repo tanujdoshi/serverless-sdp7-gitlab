@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import AWS from 'aws-sdk';
 import { useNavigate } from "react-router-dom";
 import { Container, Typography, TextField, Button, Alert } from "@mui/material";
-
+import axios from "axios";
 
 function Login() {
   const navigate = useNavigate();
@@ -38,6 +38,15 @@ function Login() {
       const res = await cognito.initiateAuth(params).promise();
       if(res.AuthenticationResult){
         // const 
+        // trying the get the security questions
+        const questionRes = await axios.post("https://fsywgygjrg.execute-api.us-east-1.amazonaws.com/dev/login/getSecQuesAns",
+          {email:email}
+        );
+        console.log("questionRes",questionRes);
+        const question1 = JSON.parse(questionRes.data.body).question1; 
+        const answer1 = JSON.parse(questionRes.data.body).answer1; 
+        setSecurityQuestion1(question1);
+        setSecurityAnswer2(answer1);
         setShowSecurityQuestions(true);
         localStorage.setItem('accessToken',res.AuthenticationResult.AccessToken);
         localStorage.setItem('refreshToken',res.AuthenticationResult.RefreshToken);
