@@ -4,7 +4,7 @@ import { AppBar, Toolbar, Button } from "@mui/material";
 import Home from "./Components/Home/Home";
 import Login from "./Components/Authentication/Login/Login";
 import SignUp from "./Components/Authentication/Register/Register";
-
+import Confirmation from "./Components/Authentication/Register/Confirmation";
 function App() {
   return (
     <Router>
@@ -24,7 +24,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<SignUp />} />
+        <Route path="/signup" element={<SignUp />} />\
+        <Route path="/confirmation" element={<Confirmation/>} />
       </Routes>
     </Router>
   );
