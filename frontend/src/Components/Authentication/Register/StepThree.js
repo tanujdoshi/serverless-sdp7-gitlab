@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { TextField, Typography } from "@mui/material";
 
-const StepThree = ({ formData, handleChange }) => {
+const StepThree = ({ formData, handleChange, errors }) => {
   const [question, setQuestion] = useState("");
 
   useEffect(() => {
@@ -33,6 +33,8 @@ const StepThree = ({ formData, handleChange }) => {
         onChange={handleChange}
         fullWidth
         margin="normal"
+        error={!!errors.captchaAnswer}
+        helperText={errors.captchaAnswer}
       />
     </>
   );

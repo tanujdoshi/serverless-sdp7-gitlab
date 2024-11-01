@@ -10,10 +10,10 @@ const StepOne = ({ formData, handleChange, errors }) => {
         name="name"
         value={formData.name}
         onChange={handleChange}
-        error={!!errors.name}
-        helperText={errors.name}
         fullWidth
         margin="normal"
+        error={!!errors.name}
+        helperText={errors.name}
       />
 
       <TextField
@@ -24,7 +24,8 @@ const StepOne = ({ formData, handleChange, errors }) => {
         onChange={handleChange}
         fullWidth
         margin="normal"
-        required
+        error={!!errors.email}
+        helperText={errors.email}
       />
       <TextField
         label="Password"
@@ -34,7 +35,8 @@ const StepOne = ({ formData, handleChange, errors }) => {
         onChange={handleChange}
         fullWidth
         margin="normal"
-        required
+        error={!!errors.password}
+        helperText={errors.password}
       />
       <TextField
         label="Role"
@@ -44,7 +46,8 @@ const StepOne = ({ formData, handleChange, errors }) => {
         onChange={handleChange}
         fullWidth
         margin="normal"
-        required
+        error={!!errors.role}
+        helperText={errors.role}
       >
         <MenuItem value="User">User</MenuItem>
         <MenuItem value="Agent">QDP Agent</MenuItem>

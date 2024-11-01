@@ -2,7 +2,7 @@
 import React from "react";
 import { TextField, Typography } from "@mui/material";
 
-const StepTwo = ({ formData, handleChange }) => {
+const StepTwo = ({ formData, handleChange, errors }) => {
   return (
     <>
       <Typography variant="h6" margin="normal">
@@ -15,7 +15,8 @@ const StepTwo = ({ formData, handleChange }) => {
         onChange={handleChange}
         fullWidth
         margin="normal"
-        required
+        error={!!errors.securityAnswerWritten}
+        helperText={errors.securityAnswerWritten}
       />
     </>
   );

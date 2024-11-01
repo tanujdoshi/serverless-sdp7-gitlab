@@ -1,7 +1,7 @@
 import React from "react";
-import { TextField, MenuItem } from "@mui/material";
+import { TextField } from "@mui/material";
 
-const StepOne = ({ formData, handleChange }) => {
+const StepOne = ({ formData, handleChange, errors }) => {
   return (
     <>
       <TextField
@@ -12,7 +12,8 @@ const StepOne = ({ formData, handleChange }) => {
         onChange={handleChange}
         fullWidth
         margin="normal"
-        required
+        error={!!errors.email}
+        helperText={errors.email}
       />
       <TextField
         label="Password"
@@ -22,7 +23,8 @@ const StepOne = ({ formData, handleChange }) => {
         onChange={handleChange}
         fullWidth
         margin="normal"
-        required
+        error={!!errors.password}
+        helperText={errors.password}
       />
     </>
   );

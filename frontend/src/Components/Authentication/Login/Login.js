@@ -19,6 +19,7 @@ import { v4 as uuidv4 } from "uuid";
 
 function Login() {
   const steps = ["Personal Details", "Security Quesiton", "Math"];
+  const [errors, setErrors] = useState({});
   const [step, setStep] = useState(1);
   const [token, setToken] = useState({});
   const [formData, setFormData] = useState({
@@ -35,10 +36,37 @@ function Login() {
     apiVersion: "2016-04-18",
   });
 
+  const validate = () => {
+    const newErrors = {};
+    if (step === 1) {
+      if (!formData.email) newErrors.email = "Email is required";
+      else if (!/\S+@\S+\.\S+/.test(formData.email))
+        newErrors.email = "Email is invalid";
+      if (!formData.password) newErrors.password = "Password is required";
+      else if (formData.password.length < 6)
+        newErrors.password = "Password must be at least 6 characters";
+    }
+    if (step === 2) {
+      if (!formData.securityAnswerWritten)
+        newErrors.securityAnswerWritten = "Security Answer is required";
+    }
+    if (step === 3) {
+      if (!formData.captchaAnswer)
+        newErrors.captchaAnswer = "Answer is required";
+    }
+    return newErrors;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const newErrors = validate();
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    } else {
+      setErrors({});
+    }
 
-    // Login step
     if (step === 1) {
       const params = {
         AuthFlow: "USER_PASSWORD_AUTH",
@@ -114,11 +142,29 @@ function Login() {
   const renderStepContent = () => {
     switch (step) {
       case 1:
-        return <StepOne formData={formData} handleChange={handleChange} />;
+        return (
+          <StepOne
+            formData={formData}
+            handleChange={handleChange}
+            errors={errors}
+          />
+        );
       case 2:
-        return <StepTwo formData={formData} handleChange={handleChange} />;
+        return (
+          <StepTwo
+            formData={formData}
+            handleChange={handleChange}
+            errors={errors}
+          />
+        );
       case 3:
-        return <StepThree formData={formData} handleChange={handleChange} />;
+        return (
+          <StepThree
+            formData={formData}
+            handleChange={handleChange}
+            errors={errors}
+          />
+        );
       default:
         return null;
     }

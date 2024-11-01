@@ -2,7 +2,7 @@
 import React from "react";
 import { TextField, MenuItem } from "@mui/material";
 
-const StepTwo = ({ formData, handleChange }) => {
+const StepTwo = ({ formData, handleChange, errors }) => {
   const questions = [
     "What is your mother's maiden name?",
     "What is your favorite childhood pet?",
@@ -21,7 +21,8 @@ const StepTwo = ({ formData, handleChange }) => {
         onChange={handleChange}
         fullWidth
         margin="normal"
-        required
+        error={!!errors.securityQuestion1}
+        helperText={errors.securityQuestion1}
       >
         {questions.map((question, index) => (
           <MenuItem key={index} value={question}>
@@ -36,7 +37,8 @@ const StepTwo = ({ formData, handleChange }) => {
         onChange={handleChange}
         fullWidth
         margin="normal"
-        required
+        error={!!errors.securityAnswer1}
+        helperText={errors.securityAnswer1}
       />
     </>
   );

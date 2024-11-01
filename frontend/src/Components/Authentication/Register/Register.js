@@ -23,10 +23,37 @@ const cognito = new AWS.CognitoIdentityServiceProvider({
 });
 
 function SignUp() {
+  const [errors, setErrors] = useState({});
+
   const steps = ["Personal Details", "Security Quesiton", "Math"];
 
-  const [errors, setErrors] = useState({});
   const [step, setStep] = useState(1);
+
+  const validate = () => {
+    const newErrors = {};
+    if (step === 1) {
+      if (!formData.name) newErrors.name = "Name is required";
+      if (!formData.email) newErrors.email = "Email is required";
+      else if (!/\S+@\S+\.\S+/.test(formData.email))
+        newErrors.email = "Email is invalid";
+      if (!formData.password) newErrors.password = "Password is required";
+      else if (formData.password.length < 6)
+        newErrors.password = "Password must be at least 6 characters";
+      if (!formData.role) newErrors.role = "Role is required";
+    }
+    if (step === 2) {
+      if (!formData.securityQuestion1)
+        newErrors.securityQuestion1 = "Security Question is required";
+      if (!formData.securityAnswer1)
+        newErrors.securityAnswer1 = "Security Answer is required";
+    }
+    if (step === 3) {
+      if (!formData.captchaAnswer)
+        newErrors.captchaAnswer = "Answer is required";
+    }
+    return newErrors;
+  };
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -54,6 +81,14 @@ function SignUp() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const newErrors = validate();
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    } else {
+      setErrors({});
+    }
 
     if (step === 3) {
       console.log("Form submitted:", formData);
@@ -128,9 +163,21 @@ function SignUp() {
           />
         );
       case 2:
-        return <StepTwo formData={formData} handleChange={handleChange} />;
+        return (
+          <StepTwo
+            formData={formData}
+            handleChange={handleChange}
+            errors={errors}
+          />
+        );
       case 3:
-        return <StepThree formData={formData} handleChange={handleChange} />;
+        return (
+          <StepThree
+            formData={formData}
+            handleChange={handleChange}
+            errors={errors}
+          />
+        );
       default:
         return null;
     }
