@@ -1,136 +1,168 @@
 import React, { useState } from "react";
-import AWS from 'aws-sdk';
-import { useNavigate } from "react-router-dom";
-import { Container, Typography, TextField, Button, Alert } from "@mui/material";
+import AWS from "aws-sdk";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import {
+  Container,
+  Paper,
+  Stepper,
+  Button,
+  Grid,
+  Step,
+  StepLabel,
+} from "@mui/material";
 import axios from "axios";
+import StepOne from "./StepOne";
+import StepTwo from "./StepTwo";
+import StepThree from "./StepThree";
+import { v4 as uuidv4 } from "uuid";
 
 function Login() {
-  const navigate = useNavigate();
-  const [email,setEmail] = useState('');
-  const [showVerificationForm, setShowVerificationForm] = useState(false);
-  const [password,setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [showSecurityQuestions, setShowSecurityQuestions] = useState(false);
-  const [securityQuestion1, setSecurityQuestion1] = useState('');
-  const [securityAnswer1, setSecurityAnswer1] = useState('');
-  const [securityQuestion2, setSecurityQuestion2] = useState('');
-  const [securityAnswer2, setSecurityAnswer2] = useState('');
+  const steps = ["Personal Details", "Security Quesiton", "Math"];
+  const [step, setStep] = useState(1);
+  const [token, setToken] = useState({});
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    securityQuestion: "",
+    securityAnswerExpected: "",
+    securityAnswerWritten: "",
+    userIdCaptcha: uuidv4().substring(0, 6),
+    captchaAnswer: "",
+  });
   const cognito = new AWS.CognitoIdentityServiceProvider({
-    region: 'us-east-1', 
-    apiVersion: '2016-04-18',
+    region: "us-east-1",
+    apiVersion: "2016-04-18",
   });
 
-  const handleSubmit = async(e) =>{
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(email, password);
 
-    const params = {
-      AuthFlow: 'USER_PASSWORD_AUTH',
-      ClientId: '1748924r31pesr34u1sm5nb0bj',  
-      AuthParameters: {
-        USERNAME: email,
-        PASSWORD: password,
-      }
-    };
+    // Login step
+    if (step === 1) {
+      const params = {
+        AuthFlow: "USER_PASSWORD_AUTH",
+        ClientId: "1748924r31pesr34u1sm5nb0bj",
+        AuthParameters: {
+          USERNAME: formData.email,
+          PASSWORD: formData.password,
+        },
+      };
+      try {
+        const res = await cognito.initiateAuth(params).promise();
+        if (res.AuthenticationResult) {
+          const questionRes = await axios.post(
+            "https://fsywgygjrg.execute-api.us-east-1.amazonaws.com/dev/login/getSecQuesAns",
+            { email: formData.email }
+          );
+          console.log("questionRes", questionRes);
+          const question1 = JSON.parse(questionRes.data.body).question1;
+          const answer1 = JSON.parse(questionRes.data.body).answer1;
+          console.log("question1", question1);
+          console.log("answer1", answer1);
+          formData.securityQuestion = question1;
+          console.log("formData", formData.securityQuestion);
+          formData.securityAnswerExpected = answer1;
 
+          setToken(res.AuthenticationResult);
 
-    try{
-      const res = await cognito.initiateAuth(params).promise();
-      if(res.AuthenticationResult){
-        // const 
-        // trying the get the security questions
-        const questionRes = await axios.post("https://fsywgygjrg.execute-api.us-east-1.amazonaws.com/dev/login/getSecQuesAns",
-          {email:email}
-        );
-        console.log("questionRes",questionRes);
-        const question1 = JSON.parse(questionRes.data.body).question1; 
-        const answer1 = JSON.parse(questionRes.data.body).answer1; 
-        setSecurityQuestion1(question1);
-        setSecurityAnswer2(answer1);
-        setShowSecurityQuestions(true);
-        localStorage.setItem('accessToken',res.AuthenticationResult.AccessToken);
-        localStorage.setItem('refreshToken',res.AuthenticationResult.RefreshToken);
+          setStep((prevStep) => prevStep + 1);
+        }
+      } catch (err) {
+        console.error("Sign in err", err);
+        if (err.code === "NotAuthorizedException") {
+          toast.error("Incorrect email / password.");
+        } else {
+          toast.error("Something went wrong");
+        }
       }
-      return res;
-    }catch(err){
-      console.error("Sign in err",err);
-      if(err.code === 'NotAuthorizedException'){
-        setErrorMessage("Wrong username or password");
+    } else if (step === 2) {
+      console.log();
+      if (formData.securityAnswerExpected === formData.securityAnswerWritten) {
+        setStep((prevStep) => prevStep + 1);
+      } else {
+        toast.error("Answer does not match");
       }
+    } else if (step === 3) {
+      const body = {
+        user_id: formData.userIdCaptcha,
+        submitted_answer: formData.captchaAnswer,
+      };
+
+      const response = await axios.post(
+        "https://0u3r8l69m5.execute-api.us-east-1.amazonaws.com/dev1/ValidateAnswer",
+        body
+      );
+      if (response.data.statusCode != 200) {
+        toast.error("Incorrect answer. Please try again.");
+        return;
+      }
+      console.log("token", token);
+
+      localStorage.setItem("accessToken", token.Access);
+      localStorage.setItem("refreshToken", token.RefreshToken);
     }
-  }
+  };
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const renderStepContent = () => {
+    switch (step) {
+      case 1:
+        return <StepOne formData={formData} handleChange={handleChange} />;
+      case 2:
+        return <StepTwo formData={formData} handleChange={handleChange} />;
+      case 3:
+        return <StepThree formData={formData} handleChange={handleChange} />;
+      default:
+        return null;
+    }
+  };
   return (
-    <Container maxWidth="sm">
-      <Typography variant="h4" gutterBottom>
-        Login
-      </Typography>
-      <form onSubmit={handleSubmit}>
-        <TextField
-          label="Email"
-          type="email"
-          fullWidth
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          margin="normal"
-          required
-        />
-        <TextField
-          label="Password"
-          type="password"
-          fullWidth
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          margin="normal"
-          required
-        />
-        <Button variant="contained" color="primary" type="submit" fullWidth>
-          Login
-        </Button>
+    <>
+      <ToastContainer />
+      <Container maxWidth="sm">
+        <Stepper
+          activeStep={step - 1}
+          alternativeLabel
+          sx={{ marginBottom: 4, marginTop: 4 }}
+        >
+          {steps.map((label) => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
 
-        {errorMessage && (
-        <Alert severity="error" style={{ marginBottom: '10px' }}>
-          {errorMessage}
-        </Alert>
-      )}
-      </form>
+        <Paper elevation={3} sx={{ padding: 3, borderRadius: 2 }}>
+          <form onSubmit={handleSubmit}>
+            <Grid container spacing={2}>
+              {renderStepContent()}
 
-        {showSecurityQuestions && (
-         <form>
-          <TextField
-            label="Security Question 1"
-            value={securityQuestion1}
-            onChange={(e)=> setSecurityQuestion1(e.target.value)}
-            fullWidth
-            margin="normal"
-            required
-          />
-          <TextField
-            label="Security Answer 1"
-            value={securityAnswer1}
-            onChange={(e)=> setSecurityAnswer1(e.target.value)}
-            fullWidth
-            margin="normal"
-            required
-          />
-          <TextField
-            label="Security Question 2"
-            value={securityQuestion2}
-            onChange={(e)=> setSecurityQuestion2(e.target.value)}
-            fullWidth
-            margin="normal"
-            required
-          />  
-          <TextField
-            label="Security Answer 2"
-            value={securityAnswer2}
-            onChange={(e)=> setSecurityAnswer2(e.target.value)}
-            fullWidth
-            margin="normal"
-            required
-          />
-         </form>
-        )}
-    </Container>
+              <Grid
+                item
+                xs={12}
+                sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}
+              >
+                <Button
+                  variant="contained"
+                  color="primary"
+                  type="submit"
+                  fullWidth
+                >
+                  {step === steps.length ? "Sign In" : "Next"}
+                </Button>
+              </Grid>
+            </Grid>
+          </form>
+        </Paper>
+      </Container>
+    </>
   );
 }
 
