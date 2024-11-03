@@ -4,6 +4,7 @@ import { AppBar, Toolbar, Button } from "@mui/material";
 import Home from "./Components/Home/Home";
 import Login from "./Components/Authentication/Login/Login";
 import SignUp from "./Components/Authentication/Register/Register";
+import Chat from "./Components/Chat/Chat";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/chat" element={<Chat customerId="testCustomerId" agentId="testAgentId" />} />
       </Routes>
     </Router>
   );
