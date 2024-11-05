@@ -95,6 +95,9 @@ function Login() {
           setToken(res.AuthenticationResult);
 
           setStep((prevStep) => prevStep + 1);
+
+          // update in local storage
+          // localStorage.setItem("accessToken", res.AuthenticationResult.AccessToken);
         }
       } catch (err) {
         console.error("Sign in err", err);
@@ -127,8 +130,22 @@ function Login() {
       }
       console.log("token", token);
 
-      localStorage.setItem("accessToken", token.Access);
+      localStorage.setItem("accessToken", token.AccessToken);
       localStorage.setItem("refreshToken", token.RefreshToken);
+    
+      try {
+        const userResponse = await axios.post(
+          "https://fsywgygjrg.execute-api.us-east-1.amazonaws.com/dev/login/userDetails",
+          { email: formData.email }
+        );
+        const userData = JSON.parse(userResponse.data.body);
+        
+        // localStorage.setItem("userName", userData.name);
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+        toast.error("Error fetching user details");
+      }
+    
     }
   };
 
