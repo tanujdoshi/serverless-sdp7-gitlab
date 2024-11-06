@@ -13,7 +13,6 @@ const StepThree = ({ formData, handleChange, errors }) => {
             formData.userIdCaptcha
         );
         const body = JSON.parse(response.data.body);
-        console.log("body", body.question);
         setQuestion(body.question);
       } catch (error) {
         console.error("Failed to fetch roles:", error);

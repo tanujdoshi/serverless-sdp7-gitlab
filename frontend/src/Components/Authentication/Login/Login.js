@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import AWS from "aws-sdk";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -16,8 +16,13 @@ import StepOne from "./StepOne";
 import StepTwo from "./StepTwo";
 import StepThree from "./StepThree";
 import { v4 as uuidv4 } from "uuid";
+import { useNavigate } from "react-router-dom";
+import { UserContext } from "../../Context/UserContext";
 
 function Login() {
+  const { loginUser } = useContext(UserContext);
+
+  const navigate = useNavigate();
   const steps = ["Personal Details", "Security Quesiton", "Math"];
   const [errors, setErrors] = useState({});
   const [step, setStep] = useState(1);
@@ -83,13 +88,9 @@ function Login() {
             "https://fsywgygjrg.execute-api.us-east-1.amazonaws.com/dev/login/getSecQuesAns",
             { email: formData.email }
           );
-          console.log("questionRes", questionRes);
           const question1 = JSON.parse(questionRes.data.body).question1;
           const answer1 = JSON.parse(questionRes.data.body).answer1;
-          console.log("question1", question1);
-          console.log("answer1", answer1);
           formData.securityQuestion = question1;
-          console.log("formData", formData.securityQuestion);
           formData.securityAnswerExpected = answer1;
 
           setToken(res.AuthenticationResult);
@@ -105,7 +106,6 @@ function Login() {
         }
       }
     } else if (step === 2) {
-      console.log();
       if (formData.securityAnswerExpected === formData.securityAnswerWritten) {
         setStep((prevStep) => prevStep + 1);
       } else {
@@ -125,10 +125,10 @@ function Login() {
         toast.error("Incorrect answer. Please try again.");
         return;
       }
-      console.log("token", token);
 
-      localStorage.setItem("accessToken", token.Access);
-      localStorage.setItem("refreshToken", token.RefreshToken);
+      loginUser(formData.email);
+
+      navigate("/");
     }
   };
 
