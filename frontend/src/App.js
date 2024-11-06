@@ -4,9 +4,14 @@ import { AppBar, Toolbar, Button } from "@mui/material";
 import Home from "./Components/Home/Home";
 import Login from "./Components/Authentication/Login/Login";
 import SignUp from "./Components/Authentication/Register/Register";
+import Confirmation from "./Components/Authentication/Register/Confirmation";
 import Chat from "./Components/Chat/Chat";
 
 function App() {
+
+  // const customerId = "testCustomerId"; 
+  // const agentId = "testAgentId"; 
+
   return (
     <Router>
       <AppBar position="static">
@@ -25,7 +30,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<SignUp />} />
+        <Route path="/signup" element={<SignUp />} />\
+        <Route path="/confirmation" element={<Confirmation/>} />
         <Route path="/chat" element={<Chat customerId="testCustomerId" agentId="testAgentId" />} />
       </Routes>
     </Router>

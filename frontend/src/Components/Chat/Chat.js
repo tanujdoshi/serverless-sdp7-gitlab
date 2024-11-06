@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { db, collection, addDoc, query, where, orderBy, limit, getDocs, onSnapshot } from "../../Config/firebase";
+import { db, collection, addDoc, query, where, orderBy, limit, getDocs, onSnapshot } from "./firebase";
 import { Box, Button, TextField, Typography, List, ListItem, Paper } from "@mui/material";
 
 const Chat = ({ customerId, agentId }) => {
