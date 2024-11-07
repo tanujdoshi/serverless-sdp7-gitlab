@@ -126,6 +126,13 @@ function Login() {
         return;
       }
 
+      await axios.post(
+        "https://5q5nra43v3.execute-api.us-east-1.amazonaws.com/dev/login-notification",
+        {
+          userEmail: formData.email,
+        }
+      );
+
       loginUser(formData.email);
 
       navigate("/");
