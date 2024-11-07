@@ -136,6 +136,13 @@ function SignUp() {
           }
         );
 
+        await axios.post(
+          "https://5q5nra43v3.execute-api.us-east-1.amazonaws.com/dev/registration-notification",
+          {
+            userEmail: formData.email,
+          }
+        );
+
         navigate("/login");
       } catch (err) {
         if (err.code === "UsernameExistsException") {
