@@ -17,11 +17,11 @@ import {
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import {
   getUploadedFileUrl,
-  processGlueJob,
   getDataProcessInfo,
+  txtProcess,
 } from "../../api/apiService";
 
-const JsonToCsvProcessor = () => {
+const TxtTransform = () => {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [glueProcess, setGlueProcess] = useState({});
@@ -53,15 +53,15 @@ const JsonToCsvProcessor = () => {
     return formattedDate;
   }
 
-  const fetchGlueProcess = async () => {
+  const fetchTxtProcess = async () => {
     const res = await getDataProcessInfo(
       localStorage.getItem("userEmail"),
-      "glue"
+      "txt"
     );
     setGlueProcess(res.data);
   };
   useEffect(() => {
-    fetchGlueProcess();
+    fetchTxtProcess();
   }, []);
 
   // Handle file selection
@@ -72,30 +72,21 @@ const JsonToCsvProcessor = () => {
   // Handle file upload
   const handleUpload = async () => {
     if (!file) {
-      console.log("Please select a JSON file to upload");
+      console.log("Please select a TXT file to upload");
       return;
     }
 
-    // const formData = new FormData();
-    // formData.append("file", file);
     setUploading(true);
 
     try {
-      const url = await getUploadedFileUrl(file);
-      // console.log("url", url);
+      //   const url = await getUploadedFileUrl(file);
+      const url = "s3://sdp7-source-bucket/input/test.txt";
       const body = {
         user_email: localStorage.getItem("userEmail"),
         s3_location: url,
       };
-      await processGlueJob(body);
 
-      // Mock response handling; ideally, this would come from the backend
-      // const newStatus = {
-      //   fileName: file.name,
-      //   status: "Processing",
-      //   timestamp: new Date().toLocaleString(),
-      // };
-      // setStatusData((prevData) => [...prevData, newStatus]);
+      await txtProcess(body);
     } catch (error) {
       console.log("Error uploading file");
     } finally {
@@ -106,15 +97,15 @@ const JsonToCsvProcessor = () => {
   return (
     <Container>
       <Box sx={{ mt: 4, mb: 2, textAlign: "center" }}>
-        <Typography variant="h4">JSON to CSV Processor</Typography>
+        <Typography variant="h4">TXT Entity Extractor to CSV</Typography>
         <Typography variant="subtitle1">
-          Upload JSON files to convert to CSV
+          Upload TXT files to extract entities and save results as CSV
         </Typography>
       </Box>
 
       <Box sx={{ display: "flex", justifyContent: "center", mb: 4 }}>
         <input
-          accept="application/json"
+          accept="text/plain"
           type="file"
           style={{ display: "none" }}
           id="upload-file"
@@ -175,7 +166,7 @@ const JsonToCsvProcessor = () => {
                             fontWeight: "bold",
                           }}
                         >
-                          {row.filename.replace(".json", ".csv")}
+                          {row.filename.replace(".txt", ".csv")}
                         </a>
                       ) : (
                         "N/A"
@@ -199,4 +190,4 @@ const JsonToCsvProcessor = () => {
   );
 };
 
-export default JsonToCsvProcessor;
+export default TxtTransform;
