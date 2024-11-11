@@ -24,7 +24,7 @@ import {
 const TxtTransform = () => {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [glueProcess, setGlueProcess] = useState({});
+  const [txtProcessData, setTxtProcessData] = useState({});
 
   const getStatusLabel = (status) => {
     switch (status) {
@@ -58,7 +58,7 @@ const TxtTransform = () => {
       localStorage.getItem("userEmail"),
       "txt"
     );
-    setGlueProcess(res.data);
+    setTxtProcessData(res.data);
   };
   useEffect(() => {
     fetchTxtProcess();
@@ -148,8 +148,8 @@ const TxtTransform = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {glueProcess.length > 0 ? (
-                glueProcess.map((row, index) => (
+              {txtProcessData.length > 0 ? (
+                txtProcessData.map((row, index) => (
                   <TableRow key={index} hover>
                     <TableCell>{row.process_id}</TableCell>
                     <TableCell>{row.filename}</TableCell>
@@ -166,7 +166,7 @@ const TxtTransform = () => {
                             fontWeight: "bold",
                           }}
                         >
-                          {row.filename.replace(".txt", ".csv")}
+                          {row.filename?.replace(".txt", ".csv")}
                         </a>
                       ) : (
                         "N/A"
