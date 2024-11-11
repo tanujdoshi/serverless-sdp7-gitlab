@@ -20,9 +20,17 @@ function Navbar() {
           Home
         </Button>
         {isLoggedIn ? (
-          <Button color="inherit" onClick={onLogout}>
-            Logout
-          </Button>
+          <>
+            <Button color="inherit" component={Link} to="/txt-transform">
+              txt-transform
+            </Button>
+            <Button color="inherit" component={Link} to="/json-to-csv">
+              json-to-csv
+            </Button>
+            <Button color="inherit" onClick={onLogout}>
+              Logout
+            </Button>
+          </>
         ) : (
           <>
             <Button color="inherit" component={Link} to="/login">

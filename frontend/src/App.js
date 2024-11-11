@@ -1,12 +1,14 @@
-import React, { useState, useEffect, createContext } from "react";
+import React from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import { AppBar, Toolbar, Button } from "@mui/material";
 import Home from "./Components/Home/Home";
 import Login from "./Components/Authentication/Login/Login";
+import JsonToCsvProcessor from "./Components/DataProcessing/JsonToCsvProcessor";
+import TxtTransform from "./Components/DataProcessing/TxtTransform";
 import SignUp from "./Components/Authentication/Register/Register";
 import Confirmation from "./Components/Authentication/Register/Confirmation";
 import Navbar from "./Components/Navbar/Navbar";
 import { UserProvider } from "./Components/Context/UserContext";
+
 function App() {
   return (
     <UserProvider>
@@ -17,6 +19,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />\
           <Route path="/confirmation" element={<Confirmation />} />
+          <Route path="/json-to-csv" element={<JsonToCsvProcessor />} />
+          <Route path="/txt-transform" element={<TxtTransform />} />
         </Routes>
       </Router>
     </UserProvider>
