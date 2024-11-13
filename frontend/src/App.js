@@ -9,7 +9,7 @@ import Chat from "./Components/Chat/Chat";
 
 function App() {
 
-  // const customerId = "testCustomerId"; 
+  const customerId = "testCustomerId"; 
   // const agentId = "testAgentId"; 
 
   return (
@@ -32,7 +32,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />\
         <Route path="/confirmation" element={<Confirmation/>} />
-        <Route path="/chat" element={<Chat customerId="testCustomerId" agentId="testAgentId" />} />
+        <Route path="/chat" element={<Chat customerId={customerId}/>} />
       </Routes>
     </Router>
   );
