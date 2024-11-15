@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, query, where, orderBy, limit, getDocs, onSnapshot } from "firebase/firestore";
+import { getFirestore, collection, addDoc, query, where, orderBy, limit, getDocs, onSnapshot, doc, updateDoc } from "firebase/firestore";
 
 const firebaseConfig = {
     authDomain: "serverless-project-439901.firebaseapp.com",
@@ -10,7 +10,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-export { db, collection, addDoc, query, where, orderBy, limit, getDocs, onSnapshot };
+export { db, collection, addDoc, query, where, orderBy, limit, getDocs, onSnapshot, doc, updateDoc };
 
 
 
