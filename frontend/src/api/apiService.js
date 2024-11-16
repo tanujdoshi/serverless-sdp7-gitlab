@@ -70,9 +70,34 @@ export const txtProcess = async (data) => {
   );
 };
 
+export const gcpWordCloud = async (formData) => {
+  await axios.post(
+    "https://us-central1-csci-5410-439301.cloudfunctions.net/process_txt",
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+};
+
+export const fetchWordCloud = async (email) => {
+  try {
+    const response = await axios.post(
+      "https://us-central1-csci-5410-439301.cloudfunctions.net/fetch_wordcloud",
+      { email }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching word cloud data:", error);
+  }
+};
 export default {
   processGlueJob,
   getUploadedFileUrl,
   getDataProcessInfo,
   txtProcess,
+  gcpWordCloud,
+  fetchWordCloud,
 };
