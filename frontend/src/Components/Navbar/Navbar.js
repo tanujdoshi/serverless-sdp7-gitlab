@@ -27,6 +27,9 @@ function Navbar() {
             <Button color="inherit" component={Link} to="/json-to-csv">
               json-to-csv
             </Button>
+            <Button color="inherit" component={Link} to="/word-cloud">
+              Word cloud
+            </Button>
             <Button color="inherit" onClick={onLogout}>
               Logout
             </Button>
