@@ -16,11 +16,13 @@ import {
 } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { fetchWordCloud, gcpWordCloud } from "../../api/apiService";
+import LookerStudioEmbed from "./LookerStudioEmbed";
 
 const WordCloud = () => {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [wordCloudData, setWordCloudData] = useState({});
+  const email = localStorage.getItem("userEmail");
 
   const getStatusLabel = (status) => {
     switch (status) {
@@ -75,7 +77,7 @@ const WordCloud = () => {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("email", localStorage.getItem("userEmail"));
+      formData.append("email", "doshitanuj3012@gmail.com");
 
       await gcpWordCloud(formData);
     } catch (error) {
@@ -90,6 +92,18 @@ const WordCloud = () => {
       <Box sx={{ mt: 4, mb: 2, textAlign: "center" }}>
         <Typography variant="h4">Generate WordCloud</Typography>
       </Box>
+
+      <LookerStudioEmbed email={"tanujdoshi3920@gmail.com"} />
+
+      {/* <iframe
+        width="600"
+        height="450"
+        src="https://lookerstudio.google.com/embed/reporting/88fc2f1c-b5a5-4eee-951c-967b334e6f24/page/3sfSE?user_email=tanujdoshi3920@gmail.com"
+        frameborder="0"
+        style={{ border: "none" }}
+        allowFullScreen
+        sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+      ></iframe> */}
 
       <Box sx={{ display: "flex", justifyContent: "center", mb: 4 }}>
         <input
