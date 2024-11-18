@@ -22,7 +22,8 @@ const WordCloud = () => {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [wordCloudData, setWordCloudData] = useState({});
-  const email = localStorage.getItem("userEmail");
+  // const email = localStorage.getItem("userEmail");
+  const email = "doshitanuj3012@gmail.com";
 
   const getStatusLabel = (status) => {
     switch (status) {
@@ -37,22 +38,8 @@ const WordCloud = () => {
     }
   };
 
-  function formatDate(timestamp) {
-    const date = new Date(timestamp * 1000);
-    const formattedDate = date.toLocaleString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-      second: "numeric",
-      hour12: true,
-    });
-    return formattedDate;
-  }
-
   const fetchWordCloudData = async () => {
-    const res = await fetchWordCloud(localStorage.getItem("userEmail"));
+    const res = await fetchWordCloud(email);
     console.log("RESS", res);
     setWordCloudData(res.data);
   };
@@ -93,18 +80,6 @@ const WordCloud = () => {
         <Typography variant="h4">Generate WordCloud</Typography>
       </Box>
 
-      <LookerStudioEmbed email={"tanujdoshi3920@gmail.com"} />
-
-      {/* <iframe
-        width="600"
-        height="450"
-        src="https://lookerstudio.google.com/embed/reporting/88fc2f1c-b5a5-4eee-951c-967b334e6f24/page/3sfSE?user_email=tanujdoshi3920@gmail.com"
-        frameborder="0"
-        style={{ border: "none" }}
-        allowFullScreen
-        sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
-      ></iframe> */}
-
       <Box sx={{ display: "flex", justifyContent: "center", mb: 4 }}>
         <input
           accept="text/plain"
@@ -119,7 +94,7 @@ const WordCloud = () => {
             component="span"
             color="primary"
             startIcon={<CloudUploadIcon />}
-            sx={{ mr: 2 }}
+            sx={{ textTransform: "none", borderRadius: "8px", mr: 2 }}
           >
             Choose File
           </Button>
@@ -129,24 +104,49 @@ const WordCloud = () => {
           color="success"
           onClick={handleUpload}
           disabled={!file || uploading}
+          sx={{ textTransform: "none", borderRadius: "8px" }}
         >
           {uploading ? <CircularProgress size={24} /> : "Upload"}
         </Button>
       </Box>
 
       <Box sx={{ mt: 4 }}>
-        <Typography variant="h6" gutterBottom>
+        <Typography variant="h6" fontWeight="bold" gutterBottom>
           File Processing Status
         </Typography>
-        <TableContainer component={Paper} sx={{ mt: 2, boxShadow: 3 }}>
+        <LookerStudioEmbed email={email} />
+        <TableContainer
+          component={Paper}
+          sx={{ mt: 2, boxShadow: 3, borderRadius: "8px" }}
+        >
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ fontWeight: "bold" }}>Reference #</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>File Name</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Status</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Output</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Timestamp</TableCell>
+                <TableCell
+                  sx={{ fontWeight: "bold", backgroundColor: "#f5f5f5" }}
+                >
+                  Reference #
+                </TableCell>
+                <TableCell
+                  sx={{ fontWeight: "bold", backgroundColor: "#f5f5f5" }}
+                >
+                  File Name
+                </TableCell>
+                <TableCell
+                  sx={{ fontWeight: "bold", backgroundColor: "#f5f5f5" }}
+                >
+                  Status
+                </TableCell>
+                <TableCell
+                  sx={{ fontWeight: "bold", backgroundColor: "#f5f5f5" }}
+                >
+                  Output
+                </TableCell>
+                <TableCell
+                  sx={{ fontWeight: "bold", backgroundColor: "#f5f5f5" }}
+                >
+                  Timestamp
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
