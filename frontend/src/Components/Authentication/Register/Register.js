@@ -16,6 +16,7 @@ import AWS from "aws-sdk";
 import StepOne from "./StepOne";
 import StepTwo from "./StepTwo";
 import StepThree from "./StepThree";
+import { useNavigate } from "react-router-dom";
 
 const cognito = new AWS.CognitoIdentityServiceProvider({
   region: "us-east-1",
@@ -23,6 +24,8 @@ const cognito = new AWS.CognitoIdentityServiceProvider({
 });
 
 function SignUp() {
+  const navigate = useNavigate();
+
   const [errors, setErrors] = useState({});
 
   const steps = ["Personal Details", "Security Quesiton", "Math"];
@@ -91,8 +94,6 @@ function SignUp() {
     }
 
     if (step === 3) {
-      console.log("Form submitted:", formData);
-
       // First check if math skill is correct or not
       const body = {
         user_id: formData.userIdCaptcha,
@@ -103,7 +104,6 @@ function SignUp() {
         body
       );
 
-      console.log("response", response);
       if (response.data.statusCode != 200) {
         toast.error("Incorrect answer. Please try again.");
         return;
@@ -118,8 +118,6 @@ function SignUp() {
 
         await cognito.signUp(params).promise();
 
-        console.log("User signed up");
-        // Call backend API to verify the user
         await axios.post(
           "https://fsywgygjrg.execute-api.us-east-1.amazonaws.com/dev/signup/verify",
           {
@@ -137,6 +135,15 @@ function SignUp() {
             role: formData.role,
           }
         );
+
+        await axios.post(
+          "https://5q5nra43v3.execute-api.us-east-1.amazonaws.com/dev/registration-notification",
+          {
+            userEmail: formData.email,
+          }
+        );
+
+        navigate("/login");
       } catch (err) {
         if (err.code === "UsernameExistsException") {
           toast.error(
@@ -146,7 +153,6 @@ function SignUp() {
           toast.error("Something went wrong. Please try again");
         }
       }
-      // console.log(uploadResponse);
     } else {
       setStep((prevStep) => prevStep + 1);
     }
