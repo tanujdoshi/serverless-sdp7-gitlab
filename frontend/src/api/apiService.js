@@ -20,6 +20,14 @@ export const getDataProcessInfo = async (email, type) => {
   );
 };
 
+// get data process from emailk
+export const getAllDataProcess = async (email) => {
+  return axios.get(
+    "https://kdhprlykjeacymoqef22co3ie40unnqa.lambda-url.us-east-1.on.aws/?email=" +
+      email
+  );
+};
+
 export const getUploadedFileUrl = async (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -97,6 +105,7 @@ export default {
   processGlueJob,
   getUploadedFileUrl,
   getDataProcessInfo,
+  getAllDataProcess,
   txtProcess,
   gcpWordCloud,
   fetchWordCloud,

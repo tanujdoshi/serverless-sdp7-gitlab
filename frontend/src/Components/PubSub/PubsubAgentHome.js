@@ -11,8 +11,11 @@ import {
   ListItemText,
   TextField,
   Typography,
+  Select,
+  MenuItem,
+  FormControl,
 } from "@mui/material";
-
+import { getAllDataProcess } from "../../api/apiService";
 import axios from "axios";
 import {
   db,
@@ -30,8 +33,9 @@ import {
 const PubsubAgentHome = () => {
   const agentId = localStorage.getItem("userEmail");
   const [concernText, setConcernText] = useState("");
-  const [refrenceId, setRefrenceId] = useState("");
+  const [referenceId, setReferenceId] = useState("");
   const [concerns, setConcerns] = useState([]);
+  const [dataProcess, setDataProcess] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedConcern, setSelectedConcern] = useState(null); // Track selected concern
   const [messages, setMessages] = useState([]); // Messages for the selected concern
@@ -54,8 +58,20 @@ const PubsubAgentHome = () => {
     fetchConcerns();
   }, [agentId]);
 
+  useEffect(() => {
+    const fetchDataProcess = async () => {
+      try {
+        const res = await getAllDataProcess(agentId);
+        setDataProcess(res.data);
+      } catch (error) {
+        console.error("Error fetching concerns:", error);
+      }
+    };
+    fetchDataProcess();
+  }, [agentId]);
+
   const createConcern = async () => {
-    if (!concernText || !refrenceId) return;
+    if (!concernText || !referenceId) return;
 
     try {
       // Get all agents excluding the current agent
@@ -69,7 +85,7 @@ const PubsubAgentHome = () => {
 
       // Create a new concern document
       await addDoc(collection(db, "Concerns"), {
-        refrenceId,
+        refrenceId: referenceId,
         concerntext: concernText,
         agentId: agent.userId, // Assign a random agent
         agentName: agent.name,
@@ -130,6 +146,9 @@ const PubsubAgentHome = () => {
       console.error("Error sending message:", error);
     }
   };
+  const handleChange = (event) => {
+    setReferenceId(event.target.value);
+  };
 
   return (
     <Box sx={{ p: 4, maxWidth: 800, mx: "auto" }}>
@@ -140,13 +159,30 @@ const PubsubAgentHome = () => {
       <Card sx={{ mb: 3 }}>
         <CardHeader title="Raise a Concern" />
         <CardContent>
-          <TextField
+          {/* <TextField
             label="Reference ID"
-            value={refrenceId}
-            onChange={(e) => setRefrenceId(e.target.value)}
+            value={referenceId}
+            onChange={(e) => setreferenceId(e.target.value)}
             fullWidth
             sx={{ mb: 2 }}
-          />
+          /> */}
+          <FormControl fullWidth sx={{ mb: 2 }}>
+            <Select
+              labelId="reference-id-label"
+              value={referenceId}
+              onChange={handleChange}
+              label="Reference ID"
+            >
+              {dataProcess.map((process) => (
+                <MenuItem
+                  key={process.process_id}
+                  value={`${process.process_id} - ${process.filename}`}
+                >
+                  {`${process.process_id} - ${process.filename}`}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <TextField
             label="Concern Text"
             value={concernText}
@@ -185,7 +221,7 @@ const PubsubAgentHome = () => {
                 >
                   <ListItemText
                     primary={concern.data().concerntext}
-                    secondary={`Reference ID: ${concern.data().refrenceId}`}
+                    secondary={`Reference ID: ${concern.data().referenceId}`}
                   />
                 </ListItem>
               ))}
