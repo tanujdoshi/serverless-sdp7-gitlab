@@ -20,15 +20,21 @@ import {
   Grid,
   CardContent,
   Card,
+  Select,
+  MenuItem,
+  FormControl,
 } from "@mui/material";
+import { getAllDataProcess } from "../../api/apiService";
 
 const PubsubClientHome = () => {
   const customerId = localStorage.getItem("userEmail");
   const [concernText, setConcernText] = useState("");
-  const [refrenceId, setRefrenceId] = useState("");
+  // const [refrenceId, setRefrenceId] = useState("");
+  const [referenceId, setReferenceId] = useState("");
   const [error, setError] = useState(null);
   const [concerns, setConcerns] = useState([]); // State to hold the concerns data
   const [loading, setLoading] = useState(true);
+  const [dataProcess, setDataProcess] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -37,6 +43,21 @@ const PubsubClientHome = () => {
 
   // Fetch concerns from Firestore
 
+  useEffect(() => {
+    const fetchDataProcess = async () => {
+      try {
+        const res = await getAllDataProcess(customerId);
+        setDataProcess(res.data);
+      } catch (error) {
+        console.error("Error fetching concerns:", error);
+      }
+    };
+    fetchDataProcess();
+  }, [customerId]);
+
+  const handleChange = (event) => {
+    setReferenceId(event.target.value);
+  };
   useEffect(() => {
     if (!customerId) return;
 
@@ -71,9 +92,9 @@ const PubsubClientHome = () => {
   const createConcern = async () => {
     console.log("CustomerId:", customerId);
     console.log("ConcernText:", concernText);
-    console.log("Reference Id:", refrenceId);
+    console.log("Reference Id:", referenceId);
 
-    if (!customerId || !concernText || !refrenceId) {
+    if (!customerId || !concernText || !referenceId) {
       setError("Please provide all details.");
       return;
     }
@@ -96,7 +117,7 @@ const PubsubClientHome = () => {
 
       // Create a new concern document in Firestore
       const concernRef = await addDoc(collection(db, "Concerns"), {
-        refrenceId: refrenceId,
+        refrenceId: referenceId,
         // concernId: concernRef.id,
         concerntext: concernText,
         customerId: customerId,
@@ -144,13 +165,31 @@ const PubsubClientHome = () => {
         <CardContent>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <TextField
+              {/* <TextField
                 label="Reference ID"
-                value={refrenceId}
-                onChange={(e) => setRefrenceId(e.target.value)}
+                value={referenceId}
+                onChange={(e) => setreferenceId(e.target.value)}
                 fullWidth
                 variant="outlined"
-              />
+              /> 
+              */}
+              <FormControl fullWidth sx={{ mb: 2 }}>
+                <Select
+                  labelId="reference-id-label"
+                  value={referenceId}
+                  onChange={handleChange}
+                  label="Reference ID"
+                >
+                  {dataProcess.map((process) => (
+                    <MenuItem
+                      key={process.process_id}
+                      value={`${process.process_id} - ${process.filename}`}
+                    >
+                      {`${process.process_id} - ${process.filename}`}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Grid>
             <Grid item xs={12}>
               <TextField
