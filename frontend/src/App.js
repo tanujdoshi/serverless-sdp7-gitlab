@@ -1,32 +1,60 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import { AppBar, Toolbar, Button } from "@mui/material";
 import Home from "./Components/Home/Home";
+import PubsubClientHome from "./Components/PubSub/pubsubClientHome";
 import Login from "./Components/Authentication/Login/Login";
+import JsonToCsvProcessor from "./Components/DataProcessing/JsonToCsvProcessor";
+import TxtTransform from "./Components/DataProcessing/TxtTransform";
+import WordCloud from "./Components/DataProcessing/WordCloud";
 import SignUp from "./Components/Authentication/Register/Register";
+import Confirmation from "./Components/Authentication/Register/Confirmation";
+import Chat from "./Components/Chat/Chat";
+import PubsubAgentHome from "./Components/PubSub/PubsubAgentHome";
+import Navbar from "./Components/Navbar/Navbar";
+import { UserProvider } from "./Components/Context/UserContext";
 
 function App() {
+  const customerId = "testCustomerId";
+  const agentId = "testAgentId";
+  const isAgent = false;
+
   return (
-    <Router>
-      <AppBar position="static">
-        <Toolbar>
-          <Button color="inherit" component={Link} to="/">
-            Home
-          </Button>
-          <Button color="inherit" component={Link} to="/login">
-            Login
-          </Button>
-          <Button color="inherit" component={Link} to="/signup">
-            Sign Up
-          </Button>
-        </Toolbar>
-      </AppBar>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<SignUp />} />
-      </Routes>
-    </Router>
+    <UserProvider>
+      <Router>
+        <Navbar />
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />\
+          <Route path="/confirmation" element={<Confirmation />} />
+          <Route path="/json-to-csv" element={<JsonToCsvProcessor />} />
+          <Route path="/txt-transform" element={<TxtTransform />} />
+          <Route path="/word-cloud" element={<WordCloud />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/client" element={<PubsubClientHome />} />
+          <Route path="/agent" element={<PubsubAgentHome />} />
+          {/* <Route
+            path="/"
+            element={
+              isAgent ? (
+                <PubsubAgentHome agentId={agentId} />
+              ) : (
+                <PubsubClientHome customerId={customerId} />
+              )
+            }
+          /> */}
+          <Route
+            path="/chat"
+            element={
+              <Chat userId={isAgent ? agentId : customerId} isAgent={isAgent} />
+            }
+          />
+          <Route
+            path="/agent-home"
+            element={<PubsubAgentHome agentId={agentId} />}
+          />
+        </Routes>
+      </Router>
+    </UserProvider>
   );
 }
 
