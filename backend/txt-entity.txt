@@ -1,0 +1,5 @@
+AWS Lambda is a serverless computing service provided by Amazon Web Services. 
+It allows developers to execute code in response to events without managing servers. 
+The service was introduced by AWS in November 2014 and supports various programming languages, 
+including Python, Node.js, and Java. Developers use AWS Lambda to build scalable applications. 
+Some of the prominent companies using AWS Lambda include Netflix, Coca-Cola, and Airbnb.
