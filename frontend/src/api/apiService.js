@@ -28,7 +28,7 @@ export const getAllDataProcess = async (email) => {
   );
 };
 
-export const getUploadedFileUrl = async (file) => {
+export const getUploadedFileUrl = async (file, type) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
@@ -38,6 +38,8 @@ export const getUploadedFileUrl = async (file) => {
         const payload = JSON.stringify({
           filename: file.name,
           fileData: base64Data,
+          type,
+          userEmail: localStorage.getItem("userEmail"),
         });
 
         // Call your upload function
