@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect, useContext} from "react";
 import { useNavigate } from "react-router-dom";
 import {
   db,
@@ -7,6 +7,8 @@ import {
   getDocs,
   query,
   where,
+  doc,
+  getDoc
 } from "../Chat/firebase";
 import axios from "axios";
 import {
@@ -25,12 +27,48 @@ import {
   FormControl,
 } from "@mui/material";
 import { getAllDataProcess } from "../../api/apiService";
+import { UserContext } from "../Context/UserContext";
+
+
+
+const waitForFirestoreDocument = async (refrenceId) => {
+  const maxRetries = 10; // Maximum retries for polling
+  const delay = 1000; // Delay in milliseconds between each retry
+  let retries = 0;
+
+  while (retries < maxRetries) {
+    try {
+      const q = query(
+          collection(db, "Concerns"),
+          where("refrenceId", "==", refrenceId) // Use "refrenceId" here
+      );
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        const doc = querySnapshot.docs[0]; // Get the first matching document
+        return doc.id; // Return the Firestore document ID
+      }
+    } catch (error) {
+      console.error("Error fetching Firestore document:", error);
+    }
+
+    // Wait for the delay period before retrying
+    await new Promise((resolve) => setTimeout(resolve, delay));
+    retries++;
+  }
+
+  throw new Error("Timeout waiting for Firestore document creation.");
+};
+
+
+
 
 const PubsubClientHome = () => {
+  const { userData } = useContext(UserContext);
   const customerId = localStorage.getItem("userEmail");
   const [concernText, setConcernText] = useState("");
   // const [refrenceId, setRefrenceId] = useState("");
-  const [referenceId, setReferenceId] = useState("");
+  const [refrenceId, setRefrenceId] = useState("");
   const [error, setError] = useState(null);
   const [concerns, setConcerns] = useState([]); // State to hold the concerns data
   const [loading, setLoading] = useState(true);
@@ -56,7 +94,8 @@ const PubsubClientHome = () => {
   }, [customerId]);
 
   const handleChange = (event) => {
-    setReferenceId(event.target.value);
+    setRefrenceId(event.target.value);
+    console.log("Selected Reference ID:", event.target.value);
   };
   useEffect(() => {
     if (!customerId) return;
@@ -89,58 +128,60 @@ const PubsubClientHome = () => {
     fetchConcerns();
   }, [customerId]);
 
+
   const createConcern = async () => {
     console.log("CustomerId:", customerId);
     console.log("ConcernText:", concernText);
-    console.log("Reference Id:", referenceId);
+    console.log("Reference Id:", refrenceId);
 
-    if (!customerId || !concernText || !referenceId) {
+    if (!customerId || !concernText || !refrenceId) {
       setError("Please provide all details.");
       return;
     }
     setError(null);
 
     try {
-      // Fetch a random agent
-      // const response = await axios.get(
-      //   "https://5q5nra43v3.execute-api.us-east-1.amazonaws.com/dev/random-agent"
-      // );
-      // const agent = JSON.parse(response.data.body);
+      // Prepare the payload for the publishConcern HTTP endpoint
+      const payload = {
+        name: userData.name, // Assuming customerId serves as the name
+        email: customerId, // Assuming customer email is the same as ID
+        refrenceId: refrenceId, // Use "refrenceId" consistently
+        concernText: concernText,
+      };
 
-      // console.log("Agent data from API:", agent); // Log agent data for debugging
+      // Make a POST request to the publishConcern endpoint
+      const response = await axios.post(
+          "https://us-central1-serverless-project-439901.cloudfunctions.net/publishConcern",
+          payload
+      );
 
-      // Check if agentId exists in the response
-      // if (!agent.userId) {
-      //   setError("Agent data is not available.");
-      //   return;
-      // }
+      console.log("Concern successfully published with message ID:", response.data);
 
-      // Create a new concern document in Firestore
-      const concernRef = await addDoc(collection(db, "Concerns"), {
-        refrenceId: referenceId,
-        // concernId: concernRef.id,
-        concerntext: concernText,
-        customerId: customerId,
-        // customerName: customerName,
-        // agentName: agent.name,
-        // agentId: agent.userId,
-        agentId: "dharmik@gmail.com", 
-        agentName: "Dharmik",
-        isActive: true,
-      });
+      // Wait for the Firestore document to be created by the subscribe function
+      const concernId = await waitForFirestoreDocument(refrenceId);
+      console.log("Concern ID retrieved:", concernId);
 
-      console.log("New concern created with id:", concernRef.id);
+      // Fetch the agent details from Firestore (optional)
+      const docSnapshot = await getDoc(doc(db, "Concerns", concernId));
+      const concernData = docSnapshot.data();
 
-      // Redirect to the Chat page with concernId and agentId as state parameters
+      // Redirect to the Chat page with the concernId and agentId
       navigate("/chat", {
-        //state: { concernId: concernRef.id, agentId: agent.userId },
-        state: { concernId: concernRef.id, agentId: "dharmik@gmail.com", agentName: "Dharmik", customerId: customerId },
+        state: {
+          concernId: concernId,
+          agentId: concernData.agentEmail,
+          agentName: concernData.agentName,
+          customerId: customerId,
+        },
       });
     } catch (error) {
-      console.error("Error creating concern:", error);
+      console.error("Error publishing concern:", error);
       setError("An error occurred while creating your concern.");
     }
   };
+
+
+
 
   const handleOpenChat = (concern) => {
     navigate("/chat", {
@@ -170,8 +211,8 @@ const PubsubClientHome = () => {
             <Grid item xs={12}>
               {/* <TextField
                 label="Reference ID"
-                value={referenceId}
-                onChange={(e) => setreferenceId(e.target.value)}
+                value={refrenceId}
+                onChange={(e) => setrefrenceId(e.target.value)}
                 fullWidth
                 variant="outlined"
               />
@@ -179,7 +220,7 @@ const PubsubClientHome = () => {
               <FormControl fullWidth sx={{ mb: 2 }}>
                 <Select
                   labelId="reference-id-label"
-                  value={referenceId}
+                  value={refrenceId}
                   onChange={handleChange}
                   label="Reference ID"
                 >

@@ -11,6 +11,7 @@ import {
   onSnapshot,
   doc,
   updateDoc,
+  getDoc,
 } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -34,6 +35,7 @@ export {
   onSnapshot,
   doc,
   updateDoc,
+  getDoc
 };
 
 // Allow only authenticated users

@@ -17,6 +17,13 @@ const Chat = () => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
 
+    useEffect(() => {
+        console.log("Concern ID:", concernId);
+        console.log("Agent ID:", agentId);
+        console.log("Agent Name:", agentName);
+        console.log("Customer ID:", customerId);
+    }, [concernId, agentId, agentName, customerId]);
+
   const senderType = "customer";
 
   // Function to send message to Firestore
