@@ -102,18 +102,18 @@ const PubsubClientHome = () => {
 
     try {
       // Fetch a random agent
-      const response = await axios.get(
-        "https://5q5nra43v3.execute-api.us-east-1.amazonaws.com/dev/random-agent"
-      );
-      const agent = JSON.parse(response.data.body);
+      // const response = await axios.get(
+      //   "https://5q5nra43v3.execute-api.us-east-1.amazonaws.com/dev/random-agent"
+      // );
+      // const agent = JSON.parse(response.data.body);
 
-      console.log("Agent data from API:", agent); // Log agent data for debugging
+      // console.log("Agent data from API:", agent); // Log agent data for debugging
 
       // Check if agentId exists in the response
-      if (!agent.userId) {
-        setError("Agent data is not available.");
-        return;
-      }
+      // if (!agent.userId) {
+      //   setError("Agent data is not available.");
+      //   return;
+      // }
 
       // Create a new concern document in Firestore
       const concernRef = await addDoc(collection(db, "Concerns"), {
@@ -121,9 +121,11 @@ const PubsubClientHome = () => {
         // concernId: concernRef.id,
         concerntext: concernText,
         customerId: customerId,
-        // customerName: "ABC"
-        agentName: agent.name,
-        agentId: agent.userId,
+        // customerName: customerName,
+        // agentName: agent.name,
+        // agentId: agent.userId,
+        agentId: "dharmik@gmail.com", 
+        agentName: "Dharmik",
         isActive: true,
       });
 
@@ -131,7 +133,8 @@ const PubsubClientHome = () => {
 
       // Redirect to the Chat page with concernId and agentId as state parameters
       navigate("/chat", {
-        state: { concernId: concernRef.id, agentId: agent.userId },
+        //state: { concernId: concernRef.id, agentId: agent.userId },
+        state: { concernId: concernRef.id, agentId: "dharmik@gmail.com", agentName: "Dharmik", customerId: customerId },
       });
     } catch (error) {
       console.error("Error creating concern:", error);
@@ -141,8 +144,8 @@ const PubsubClientHome = () => {
 
   const handleOpenChat = (concern) => {
     navigate("/chat", {
-      state: { concernId: concern.id, agentId: concern.agentId },
-    });
+      state: { concernId: concern.id, agentId: concern.agentId, agentName: concern.agentName, customerId: customerId },
+    });   
   };
 
   return (
@@ -171,7 +174,7 @@ const PubsubClientHome = () => {
                 onChange={(e) => setreferenceId(e.target.value)}
                 fullWidth
                 variant="outlined"
-              /> 
+              />
               */}
               <FormControl fullWidth sx={{ mb: 2 }}>
                 <Select

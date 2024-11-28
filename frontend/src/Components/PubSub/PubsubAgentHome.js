@@ -33,7 +33,7 @@ import {
 const PubsubAgentHome = () => {
   const agentId = localStorage.getItem("userEmail");
   const [concernText, setConcernText] = useState("");
-  const [referenceId, setReferenceId] = useState("");
+  const [refrenceId, setReferenceId] = useState("");
   const [concerns, setConcerns] = useState([]);
   const [dataProcess, setDataProcess] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -71,24 +71,26 @@ const PubsubAgentHome = () => {
   }, [agentId]);
 
   const createConcern = async () => {
-    if (!concernText || !referenceId) return;
+    if (!concernText || !refrenceId) return;
 
     try {
       // Get all agents excluding the current agent
-      const response = await axios.get(
-        "https://5q5nra43v3.execute-api.us-east-1.amazonaws.com/dev/random-agent"
-      );
-      const agents = response.data.filter((agent) => agent.userId !== agentId); // Exclude the current agent
+      // const response = await axios.get(
+      //   "https://5q5nra43v3.execute-api.us-east-1.amazonaws.com/dev/random-agent"
+      // );
+      // const agents = response.data.filter((agent) => agent.userId !== agentId); // Exclude the current agent  
 
       // Select a random agent
-      const agent = agents[Math.floor(Math.random() * agents.length)];
+      // const agent = agents[Math.floor(Math.random() * agents.length)];
 
       // Create a new concern document
       await addDoc(collection(db, "Concerns"), {
-        refrenceId: referenceId,
+        refrenceId: refrenceId,
         concerntext: concernText,
-        agentId: agent.userId, // Assign a random agent
-        agentName: agent.name,
+        // agentId: agent.userId, // Assign a random agent
+        // agentName: agent.name,
+        agentId: "dharmik@gmail.com", 
+        agentName: "Dharmik",
         isActive: true,
       });
 
@@ -113,7 +115,7 @@ const PubsubAgentHome = () => {
   };
 
   const handleSendMessage = async () => {
-    if (!concernText || !selectedConcern) return;
+    if (!concernText || !selectedConcern) return;    
 
     try {
       // Add the new message to the "messages" subcollection under the selected concern
@@ -123,7 +125,8 @@ const PubsubAgentHome = () => {
           text: concernText,
           senderId: agentId,
           timestamp: new Date(),
-          type: "agent", // Type can be "agent" or "customer"
+          type: "agent", // Type can be "agent" or "customer",
+          receiverId: selectedConcern.data().customerId,
         }
       );
 
@@ -169,7 +172,7 @@ const PubsubAgentHome = () => {
           <FormControl fullWidth sx={{ mb: 2 }}>
             <Select
               labelId="reference-id-label"
-              value={referenceId}
+              value={refrenceId}
               onChange={handleChange}
               label="Reference ID"
             >
@@ -221,7 +224,7 @@ const PubsubAgentHome = () => {
                 >
                   <ListItemText
                     primary={concern.data().concerntext}
-                    secondary={`Reference ID: ${concern.data().referenceId}`}
+                    secondary={`Reference ID: ${concern.data().refrenceId}`}
                   />
                 </ListItem>
               ))}
@@ -233,7 +236,7 @@ const PubsubAgentHome = () => {
       {selectedConcern && (
         <Card sx={{ mt: 3 }}>
           <CardHeader
-            title={`Chat for Concern: ${selectedConcern.data().refrenceId}`}
+            title={`Chat for Concern: ${selectedConcern.data().concerntext}, ${selectedConcern.data().customerId}`}
           />
           <Divider />
           <CardContent>
