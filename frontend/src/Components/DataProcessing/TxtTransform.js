@@ -32,8 +32,8 @@ const TxtTransform = () => {
         return <Chip label="Completed" color="success" />;
       case "in_progress":
         return <Chip label="In Progress" color="warning" />;
-      case "error":
-        return <Chip label="Error" color="error" />;
+      case "Failed":
+        return <Chip label="Failed" color="error" />;
       default:
         return <Chip label="Unknown" />;
     }
@@ -79,14 +79,13 @@ const TxtTransform = () => {
     setUploading(true);
 
     try {
-      //   const url = await getUploadedFileUrl(file);
-      const url = "s3://sdp7-source-bucket/input/test.txt";
-      const body = {
-        user_email: localStorage.getItem("userEmail"),
-        s3_location: url,
-      };
-
-      await txtProcess(body);
+      const url = await getUploadedFileUrl(file, "txt");
+      // const url = "s3://sdp7-source-bucket/input/test.txt";
+      // const body = {
+      //   user_email: localStorage.getItem("userEmail"),
+      //   s3_location: url,
+      // };
+      // await txtProcess(body);
     } catch (error) {
       console.log("Error uploading file");
     } finally {

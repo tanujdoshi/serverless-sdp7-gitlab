@@ -3,12 +3,17 @@ import { Button } from "@mui/material";
 
 const LookerStudioEmbed = ({ email }) => {
   const reportBaseUrl =
-    "https://lookerstudio.google.com/embed/u/0/reporting/88fc2f1c-b5a5-4eee-951c-967b334e6f24/page/3sfSE";
+    "https://lookerstudio.google.com/embed/reporting/88fc2f1c-b5a5-4eee-951c-967b334e6f24/page/3sfSE";
 
-  // Encode the email parameter
-  const encodedParams = encodeURIComponent(JSON.stringify({ email }));
-  const reportUrl = `${reportBaseUrl}?params=${encodedParams}&refresh=1`;
+  var params = {
+    "ds1.email_parameter": localStorage.getItem("userEmail"),
+  };
+  var paramsAsString = JSON.stringify(params);
+  var encodedParams = encodeURIComponent(paramsAsString);
 
+  const reportUrl = `${reportBaseUrl}?params=${encodedParams}`;
+
+  console.log("reportUrl", reportUrl);
   const handleOpenInNewTab = () => {
     const newTab = window.open();
     newTab.document.body.innerHTML = `
