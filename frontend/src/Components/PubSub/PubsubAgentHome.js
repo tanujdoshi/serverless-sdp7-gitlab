@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect, useContext} from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Button,
@@ -29,32 +30,61 @@ import {
   updateDoc,
   orderBy,
 } from "../Chat/firebase";
+import { UserContext } from "../Context/UserContext";
+
 
 const PubsubAgentHome = () => {
+  const { userData } = useContext(UserContext);
   const agentId = localStorage.getItem("userEmail");
   const [concernText, setConcernText] = useState("");
   const [referenceId, setReferenceId] = useState("");
   const [concerns, setConcerns] = useState([]);
+  const [assignedConcerns, setAssignedConcerns] = useState([]);
+  const [raisedConcerns, setRaisedConcerns] = useState([]);
   const [dataProcess, setDataProcess] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedConcern, setSelectedConcern] = useState(null); // Track selected concern
   const [messages, setMessages] = useState([]); // Messages for the selected concern
+  const navigate = useNavigate();
 
+
+  // Fetch assigned and raised concerns
   useEffect(() => {
     const fetchConcerns = async () => {
       setLoading(true);
       try {
-        const querySnapshot = await getDocs(collection(db, "Concerns"));
-        const agentConcerns = querySnapshot.docs.filter(
-          (doc) => doc.data().agentId === agentId
+        const qAssigned = query(
+            collection(db, "Concerns"),
+            where("agentEmail", "==", agentId) // Concerns assigned to the agent
         );
-        setConcerns(agentConcerns);
+        const qRaised = query(
+            collection(db, "Concerns"),
+            where("customerEmail", "==", agentId) // Concerns raised by the agent
+        );
+
+        const [assignedSnapshot, raisedSnapshot] = await Promise.all([
+          getDocs(qAssigned),
+          getDocs(qRaised),
+        ]);
+
+        const assigned = assignedSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        const raised = raisedSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        setAssignedConcerns(assigned);
+        setRaisedConcerns(raised);
       } catch (error) {
         console.error("Error fetching concerns:", error);
       } finally {
         setLoading(false);
       }
     };
+
     fetchConcerns();
   }, [agentId]);
 
@@ -70,33 +100,88 @@ const PubsubAgentHome = () => {
     fetchDataProcess();
   }, [agentId]);
 
+
+  const waitForFirestoreDocument = async (referenceId) => {
+    const maxRetries = 10; // Maximum retries
+    const delay = 1000; // 1 second delay
+    let retries = 0;
+
+    while (retries < maxRetries) {
+      try {
+        const q = query(
+            collection(db, "Concerns"),
+            where("referenceId", "==", referenceId) // Match the referenceId
+        );
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          const doc = querySnapshot.docs[0]; // Get the first matching document
+          return doc.id; // Return the Firestore document ID
+        }
+      } catch (error) {
+        console.error("Error fetching Firestore document:", error);
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, delay)); // Wait before retrying
+      retries++;
+    }
+
+    throw new Error("Timeout waiting for Firestore document creation.");
+  };
+
   const createConcern = async () => {
     if (!concernText || !referenceId) return;
 
     try {
-      // Get all agents excluding the current agent
-      const response = await axios.get(
-        "https://5q5nra43v3.execute-api.us-east-1.amazonaws.com/dev/random-agent"
+      const payload = {
+        name: userData.name, // The agent's name
+        email: agentId, // The agent's email
+        referenceId: referenceId,
+        concernText: concernText,
+      };
+
+      const response = await axios.post(
+          "https://us-central1-serverless-project-439901.cloudfunctions.net/publishConcern",
+          payload,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
       );
-      const agents = response.data.filter((agent) => agent.userId !== agentId); // Exclude the current agent
 
-      // Select a random agent
-      const agent = agents[Math.floor(Math.random() * agents.length)];
+      console.log(`Concern published successfully: ${response.data}`);
+      setConcernText("");
 
-      // Create a new concern document
-      await addDoc(collection(db, "Concerns"), {
-        refrenceId: referenceId,
-        concerntext: concernText,
-        agentId: agent.userId, // Assign a random agent
-        agentName: agent.name,
-        isActive: true,
+      // Wait for Firestore document creation
+      const concernId = await waitForFirestoreDocument(referenceId);
+
+      console.log("Concern ID retrieved:", concernId);
+
+      // Retrieve the Firestore document details
+      const docSnapshot = await getDoc(doc(db, "Concerns", concernId));
+      const concernData = docSnapshot.data();
+
+      console.log("concernData:", concernData)
+
+      console.log("00000 Concern ID retrieved:", concernId);
+
+
+      // Redirect to the Chat component
+      navigate("/chat", {
+        state: {
+          concernId: concernId,
+          agentId: concernData.agentEmail,
+          agentName: concernData.agentName,
+          customerId: concernData.customerEmail,
+        },
       });
-
-      setConcernText(""); // Clear the input after submitting
     } catch (error) {
       console.error("Error creating concern:", error);
     }
   };
+
+
 
   const handleConcernClick = async (concern) => {
     setSelectedConcern(concern);
@@ -123,7 +208,8 @@ const PubsubAgentHome = () => {
           text: concernText,
           senderId: agentId,
           timestamp: new Date(),
-          type: "agent", // Type can be "agent" or "customer"
+          type: "agent", // Type can be "agent" or "customer",
+          receiverId: selectedConcern.customerEmail,
         }
       );
 
@@ -198,7 +284,7 @@ const PubsubAgentHome = () => {
         </CardContent>
       </Card>
 
-      <Card>
+      {/*<Card>
         <CardHeader title="Assigned Concerns" />
         <CardContent>
           {loading ? (
@@ -220,12 +306,76 @@ const PubsubAgentHome = () => {
                   }}
                 >
                   <ListItemText
-                    primary={concern.data().concerntext}
-                    secondary={`Reference ID: ${concern.data().referenceId}`}
+                    primary={concern.concernText}
+                    secondary={`Reference ID: ${concern.referenceId}`}
                   />
                 </ListItem>
               ))}
             </List>
+          )}
+        </CardContent>
+      </Card>*/}
+
+      <Card sx={{ mb: 3 }}>
+        <CardHeader title="Assigned Concerns" />
+        <CardContent>
+          {loading ? (
+              <Typography>Loading assigned concerns...</Typography>
+          ) : assignedConcerns.length === 0 ? (
+              <Typography>No concerns assigned to you.</Typography>
+          ) : (
+              <List>
+                {assignedConcerns.map((concern) => (
+                    <ListItem
+                        key={concern.id}
+                        button
+                        onClick={() => handleConcernClick(concern)}
+                        sx={{
+                          mb: 1,
+                          border: "1px solid #ddd",
+                          borderRadius: 1,
+                          p: 1.5,
+                        }}
+                    >
+                      <ListItemText
+                          primary={concern.concernText}
+                          secondary={`Reference ID: ${concern.referenceId}`}
+                      />
+                    </ListItem>
+                ))}
+              </List>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader title="Raised Concerns" />
+        <CardContent>
+          {loading ? (
+              <Typography>Loading raised concerns...</Typography>
+          ) : raisedConcerns.length === 0 ? (
+              <Typography>No concerns raised by you.</Typography>
+          ) : (
+              <List>
+                {raisedConcerns.map((concern) => (
+                    <ListItem
+                        key={concern.id}
+                        button
+                        onClick={() => handleConcernClick(concern)}
+                        sx={{
+                          mb: 1,
+                          border: "1px solid #ddd",
+                          borderRadius: 1,
+                          p: 1.5,
+                        }}
+                    >
+                      <ListItemText
+                          primary={concern.concernText}
+                          secondary={`Reference ID: ${concern.referenceId}`}
+                      />
+                    </ListItem>
+                ))}
+              </List>
           )}
         </CardContent>
       </Card>
@@ -233,7 +383,7 @@ const PubsubAgentHome = () => {
       {selectedConcern && (
         <Card sx={{ mt: 3 }}>
           <CardHeader
-            title={`Chat for Concern: ${selectedConcern.data().refrenceId}`}
+            title={`Chat for Concern: ${selectedConcern.concernText} with ${selectedConcern.customerName}`}
           />
           <Divider />
           <CardContent>

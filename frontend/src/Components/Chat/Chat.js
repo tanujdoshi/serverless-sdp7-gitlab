@@ -11,13 +11,20 @@ import {
   Paper,
 } from "@mui/material";
 
-const Chat = ({ userId, isAgent }) => {
+const Chat = () => {
   const location = useLocation();
-  const { concernId, agentId, customerId } = location.state || {}; // Retrieve concernId and agentId from location state
+  const { concernId, agentId, agentName, customerId } = location.state || {}; // Retrieve concernId and agentId from location state
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
 
-  const senderType = isAgent ? "agent" : "customer";
+    useEffect(() => {
+        console.log("Concern ID:", concernId);
+        console.log("Agent ID:", agentId);
+        console.log("Agent Name:", agentName);
+        console.log("Customer ID:", customerId);
+    }, [concernId, agentId, agentName, customerId]);
+
+  const senderType = "customer";
 
   // Function to send message to Firestore
   const sendMessage = async () => {
@@ -26,9 +33,10 @@ const Chat = ({ userId, isAgent }) => {
     try {
       await addDoc(collection(db, "Concerns", concernId, "messages"), {
         text: message,
-        senderId: userId,
+        senderId: customerId,
         timestamp: new Date(),
         type: senderType,
+        receiverId: agentId,
       });
       setMessage(""); // Clear message input after sending
     } catch (error) {
@@ -39,16 +47,16 @@ const Chat = ({ userId, isAgent }) => {
   // Fetch messages from Firestore when concernId is available
   useEffect(() => {
     console.log("Concern ID:", concernId);
-    console.log("userId:", userId);
+    // console.log("userId:", userId);
     console.log("customerId:", customerId);
-    console.log("isAgent:", isAgent);
+    // console.log("isAgent:", isAgent);
 
     // if (!concernId || (!isAgent && userId !== customerId)) {
     //   console.log("Invalid concernId or user mismatch");
     //   return;
     // }
 
-    if (!concernId || !userId) return; // Skip if concernId or userId is not available
+    // if (!concernId || !userId) return; // Skip if concernId or userId is not available
 
     const messagesRef = collection(db, "Concerns", concernId, "messages");
     const unsubscribe = onSnapshot(
@@ -71,7 +79,8 @@ const Chat = ({ userId, isAgent }) => {
     );
 
     return () => unsubscribe(); // Cleanup on component unmount
-  }, [concernId, userId, customerId, isAgent]);
+  // }, [concernId, userId, customerId, isAgent]);
+}, [concernId, customerId]);
 
   return (
     <Box
@@ -94,7 +103,7 @@ const Chat = ({ userId, isAgent }) => {
           fontWeight: "bold",
         }}
       >
-        Chat with {isAgent ? "Customer" : "Agent"}
+        {`You're in conversation with Agent ${agentName}` || "Chat with your Agent"}
       </Typography>
 
       {/* Messages Section */}
@@ -157,7 +166,7 @@ const Chat = ({ userId, isAgent }) => {
                       color: msg.type === "customer" ? "#1976d2" : "#4caf50",
                     }}
                   >
-                    {msg.type === "customer" ? "You" : "Agent"}
+                    {msg.type === "customer" ? "You" : agentName || "Agent"}
                   </Typography>
                   <Typography variant="body1" sx={{ mt: 0.5 }}>
                     {msg.text}
