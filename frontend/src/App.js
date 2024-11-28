@@ -14,7 +14,7 @@ import Navbar from "./Components/Navbar/Navbar";
 import { UserProvider } from "./Components/Context/UserContext";
 
 function App() {
-  const customerId = "testCustomerId";
+  // const customerId = "testCustomerId";
   const agentId = "testAgentId";
   const isAgent = false;
 
@@ -45,7 +45,7 @@ function App() {
           <Route
             path="/chat"
             element={
-              <Chat userId={isAgent ? agentId : customerId} isAgent={isAgent} />
+              <Chat />
             }
           />
           <Route
