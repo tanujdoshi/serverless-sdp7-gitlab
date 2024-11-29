@@ -5,6 +5,11 @@ import { TableContainer, Paper, Typography } from "@mui/material";
 const FeedbackTable = () => {
 
   const [feedbackData, setFeedbackData] = useState([]);
+  const getFeedbackType = (feedBackFileName) => {
+    if(feedBackFileName.includes("glue")) return "JsonToCsv";
+    if(feedBackFileName.includes("txt")) return "TxtTransform";
+    return "Unknown";
+}
 
   useEffect(()=>{
     console.log("Feedback Data");
@@ -50,7 +55,7 @@ const FeedbackTable = () => {
             </TableRow>
           ))}
         </TableBody>
-        
+
 </Table>
 </TableContainer>
   );
