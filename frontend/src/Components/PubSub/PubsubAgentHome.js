@@ -1,22 +1,10 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
-  TextField,
-  Typography,
-  Select,
-  MenuItem,
-  FormControl,
-} from "@mui/material";
+import { Box, Typography, Tooltip, IconButton, Paper } from "@mui/material";
 import { getAllDataProcess } from "../../api/apiService";
+import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+
 import axios from "axios";
 import {
   db,
@@ -31,18 +19,21 @@ import {
   orderBy,
 } from "../Chat/firebase";
 import { UserContext } from "../Context/UserContext";
+import ChatDrawer from "../Chat/ChatDrawer";
+import ConcernsTab from "./Agenttabs/ConcernsTab";
+import RaiseConcernCard from "./Agenttabs/RaiseConcernCard";
 
 const PubsubAgentHome = () => {
   const { userData } = useContext(UserContext);
   const agentId = localStorage.getItem("userEmail");
   const [concernText, setConcernText] = useState("");
   const [referenceId, setReferenceId] = useState("");
-  const [concerns, setConcerns] = useState([]);
   const [assignedConcerns, setAssignedConcerns] = useState([]);
   const [raisedConcerns, setRaisedConcerns] = useState([]);
   const [dataProcess, setDataProcess] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedConcern, setSelectedConcern] = useState(null); // Track selected concern
+  const [isDrawerOpen, setDrawerOpen] = useState(false);
   const [messages, setMessages] = useState([]); // Messages for the selected concern
   const navigate = useNavigate();
 
@@ -202,6 +193,11 @@ const PubsubAgentHome = () => {
     const concernMessages = querySnapshot.docs.map((doc) => doc.data());
     console.log("concernMessages", concernMessages);
     setMessages(concernMessages);
+    setDrawerOpen(true);
+  };
+
+  const handleCloseDrawer = () => {
+    setDrawerOpen(false);
   };
 
   const handleSendMessage = async () => {
@@ -251,198 +247,84 @@ const PubsubAgentHome = () => {
   };
 
   return (
-    <Box sx={{ p: 4, maxWidth: 800, mx: "auto" }}>
-      <Typography variant="h4" sx={{ mb: 3 }}>
+    <Box
+      sx={{
+        p: 4,
+        maxWidth: 1200, // Increased width
+        mx: "auto",
+        backgroundColor: "#f9f9f9",
+        borderRadius: 3,
+      }}
+    >
+      {/* Main Header */}
+      <Typography
+        variant="h4"
+        sx={{
+          fontWeight: "bold",
+          mb: 5, // Increased space after the header
+          textAlign: "center",
+        }}
+      >
         Agent Home
       </Typography>
 
-      <Card sx={{ mb: 3 }}>
-        <CardHeader title="Raise a Concern" />
-        <CardContent>
-          {/* <TextField
-            label="Reference ID"
-            value={referenceId}
-            onChange={(e) => setreferenceId(e.target.value)}
-            fullWidth
-            sx={{ mb: 2 }}
-          /> */}
-          <FormControl fullWidth sx={{ mb: 2 }}>
-            <Select
-              labelId="reference-id-label"
-              value={referenceId}
-              onChange={handleChange}
-              label="Reference ID"
-            >
-              {dataProcess.map((process) => (
-                <MenuItem
-                  key={process.process_id}
-                  value={`${process.process_id} - ${process.filename}`}
-                >
-                  {`${process.process_id} - ${process.filename}`}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <TextField
-            label="Concern Text"
-            value={concernText}
-            onChange={(e) => setConcernText(e.target.value)}
-            fullWidth
-            multiline
-            rows={3}
-            sx={{ mb: 2 }}
-          />
-          <Button variant="contained" onClick={createConcern} fullWidth>
-            Raise Concern
-          </Button>
-        </CardContent>
-      </Card>
+      {/* Raise Concern Section */}
+      <Paper
+        sx={{
+          mb: 4,
+          p: 3,
+          borderRadius: 2,
+          border: "1px solid #e0e0e0",
+        }}
+      >
+        <RaiseConcernCard
+          dataProcess={dataProcess}
+          referenceId={referenceId}
+          concernText={concernText}
+          handleChange={handleChange}
+          setConcernText={setConcernText}
+          createConcern={createConcern}
+        />
+      </Paper>
 
-      {/*<Card>
-        <CardHeader title="Assigned Concerns" />
-        <CardContent>
-          {loading ? (
-            <Typography>Loading concerns...</Typography>
-          ) : concerns.length === 0 ? (
-            <Typography>No concerns assigned to you.</Typography>
-          ) : (
-            <List>
-              {concerns.map((concern) => (
-                <ListItem
-                  key={concern.id}
-                  button
-                  onClick={() => handleConcernClick(concern)}
-                  sx={{
-                    mb: 1,
-                    border: "1px solid #ddd",
-                    borderRadius: 1,
-                    p: 1.5,
-                  }}
-                >
-                  <ListItemText
-                    primary={concern.concernText}
-                    secondary={`Reference ID: ${concern.referenceId}`}
-                  />
-                </ListItem>
-              ))}
-            </List>
-          )}
-        </CardContent>
-      </Card>*/}
+      {/* Concerns Section */}
+      <Paper
+        sx={{
+          mb: 4,
+          p: 3,
+          borderRadius: 2,
+          border: "1px solid #e0e0e0",
+        }}
+      >
+        <Typography
+          variant="h5"
+          sx={{
+            mb: 3,
+            fontWeight: "500",
+          }}
+        >
+          Concerns Overview
+        </Typography>
+        <ConcernsTab
+          loading={loading}
+          assignedConcerns={assignedConcerns}
+          raisedConcerns={raisedConcerns}
+          handleConcernClick={handleConcernClick}
+        />
+      </Paper>
 
-      <Card sx={{ mb: 3 }}>
-        <CardHeader title="Assigned Concerns" />
-        <CardContent>
-          {loading ? (
-            <Typography>Loading assigned concerns...</Typography>
-          ) : assignedConcerns.length === 0 ? (
-            <Typography>No concerns assigned to you.</Typography>
-          ) : (
-            <List>
-              {assignedConcerns.map((concern) => (
-                <ListItem
-                  key={concern.id}
-                  button
-                  onClick={() => handleConcernClick(concern)}
-                  sx={{
-                    mb: 1,
-                    border: "1px solid #ddd",
-                    borderRadius: 1,
-                    p: 1.5,
-                  }}
-                >
-                  <ListItemText
-                    primary={concern.concernText}
-                    secondary={`Reference ID: ${concern.referenceId}`}
-                  />
-                </ListItem>
-              ))}
-            </List>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader title="Raised Concerns" />
-        <CardContent>
-          {loading ? (
-            <Typography>Loading raised concerns...</Typography>
-          ) : raisedConcerns.length === 0 ? (
-            <Typography>No concerns raised by you.</Typography>
-          ) : (
-            <List>
-              {raisedConcerns.map((concern) => (
-                <ListItem
-                  key={concern.id}
-                  button
-                  onClick={() => handleConcernClick(concern)}
-                  sx={{
-                    mb: 1,
-                    border: "1px solid #ddd",
-                    borderRadius: 1,
-                    p: 1.5,
-                  }}
-                >
-                  <ListItemText
-                    primary={concern.concernText}
-                    secondary={`Reference ID: ${concern.referenceId}`}
-                  />
-                </ListItem>
-              ))}
-            </List>
-          )}
-        </CardContent>
-      </Card>
-
-      {selectedConcern && (
-        <Card sx={{ mt: 3 }}>
-          <CardHeader
-            title={`Chat for Concern: ${selectedConcern.concernText} with ${selectedConcern.customerName}`}
-          />
-          <Divider />
-          <CardContent>
-            <List sx={{ maxHeight: 300, overflowY: "auto", mb: 2 }}>
-              {messages.map((msg, index) => (
-                <>
-                  <ListItem
-                    key={index}
-                    sx={{
-                      justifyContent:
-                        getMessanger(msg) == "You" ? "flex-end" : "flex-start",
-                      p: 1,
-                      display: "flex",
-                    }}
-                  >
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        backgroundColor:
-                          msg.senderId === agentId ? "#e3f2fd" : "#f1f8e9",
-                        p: 1,
-                        borderRadius: 1,
-                        display: "inline-block",
-                        maxWidth: "75%",
-                      }}
-                    >
-                      <strong>{getMessanger(msg)}:</strong> {msg.text}
-                    </Typography>
-                  </ListItem>
-                </>
-              ))}
-            </List>
-            <TextField
-              label="Your Message"
-              value={concernText}
-              onChange={(e) => setConcernText(e.target.value)}
-              fullWidth
-              sx={{ mb: 2 }}
-            />
-            <Button variant="contained" onClick={handleSendMessage} fullWidth>
-              Send Message
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+      {/* Chat Drawer */}
+      <ChatDrawer
+        selectedConcern={selectedConcern}
+        messages={messages}
+        agentId={agentId}
+        concernText={concernText}
+        setConcernText={setConcernText}
+        handleSendMessage={handleSendMessage}
+        getMessanger={getMessanger}
+        open={isDrawerOpen}
+        onClose={handleCloseDrawer}
+      />
     </Box>
   );
 };
