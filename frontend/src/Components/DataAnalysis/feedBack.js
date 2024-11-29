@@ -1,56 +1,54 @@
-import { React } from "react";
-import {  Button,  Box, Typography } from "@mui/material";
+import {React} from "react";
+import axios from "axios";
+import { useState, useEffect } from "react";
+import { TextField, Button, MenuItem, Box, Typography, Select, FormControl, InputLabel } from "@mui/material";
+
 
 const FeedbackForm = () => {
-  const [tasks, setTasks] = useState([]);
-  const [selectedTask, setSelectedTask] = useState("");
-  const [feedback, setFeedback] = useState("");
+    const [tasks, setTasks] = useState([]);
+    const [selectedTask, setSelectedTask] = useState("");
+    const [feedback, setFeedback] = useState("");
 
-  const userEmail = localStorage.getItem("userEmail");
-  useEffect(() => {
-    axios
-      .get(
-        "https://kdhprlykjeacymoqef22co3ie40unnqa.lambda-url.us-east-1.on.aws/",
-        { userEmail },
-        {
-          headers: {
-            "Content-Type": "application/json", // Set only if necessary
-          },
-        }
-      )
-      .then((res) => {
-        setTasks(res.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const { process_id, filename, type } = selectedTask;
-    axios
-      .post(
-        "https://us-central1-serverless-pro-442123.cloudfunctions.net/feedd3",
-        {
+    const userEmail = localStorage.getItem("userEmail");
+    useEffect(()=>{
+        axios.get(
+  "https://kdhprlykjeacymoqef22co3ie40unnqa.lambda-url.us-east-1.on.aws/",
+  { userEmail },
+  {
+    headers: {
+      "Content-Type": "application/json", // Set only if necessary
+    },
+  }
+)       .then((res)=>{
+            setTasks(res.data);
+        })
+        .catch((err)=>{
+            console.log(err);
+        })
+    },[])
+
+    const handleSubmit = (e) => {  
+        e.preventDefault();
+        const {process_id, filename, type} = selectedTask;
+        axios
+        .post("https://us-central1-serverless-pro-442123.cloudfunctions.net/feedd3", {
           userEmail: userEmail,
           process_id,
-          fileName: filename,
-          dpType: type,
-          feed: feedback,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      )
-      .then(() => alert("Feedback submitted!"))
-      .catch((error) => console.error(error));
-  };
-
-  return (
-    <div style={{ padding: "40px" }}>
-      <Box
+          fileName:filename,
+          dpType:type,
+          feed:feedback,
+        },{
+            headers: {
+                "Content-Type": "application/json", // Set only if necessary
+            },
+        })
+        .then(() => alert("Feedback submitted!"))
+        .catch((error) => console.error(error));
+    };
+    
+    return(
+        <div style={{padding:"40px"}}>
+        <Box
         sx={{
           maxWidth: 600,
           margin: "auto",
@@ -77,17 +75,24 @@ const FeedbackForm = () => {
             ))}
           </Select>
         </FormControl>
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleSubmit}
-        fullWidth
-      >
-        Submit
-      </Button>
+        <TextField
+          label="Feedback"
+          multiline
+          rows={4}
+          fullWidth
+          value={feedback}
+          onChange={(e) => setFeedback(e.target.value)}
+          variant="outlined"
+          sx={{ mb: 2 }}
+        />
+        <Button variant="contained" color="primary" onClick={handleSubmit} fullWidth>
+          Submit
+        </Button>
       </Box>
-    </div>
-  );
-};
+      </div>
+
+    )
+
+}
 
 export default FeedbackForm;
