@@ -1,63 +1,115 @@
-import React from "react";
-
-import { TableContainer, Paper, Typography } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography,
+  Box,
+  CircularProgress,
+  Tooltip,
+} from "@mui/material";
+import axios from "axios";
 
 const FeedbackTable = () => {
-
   const [feedbackData, setFeedbackData] = useState([]);
-  const getFeedbackType = (feedBackFileName) => {
-    if(feedBackFileName.includes("glue")) return "JsonToCsv";
-    if(feedBackFileName.includes("txt")) return "TxtTransform";
-    return "Unknown";
-}
+  const [loading, setLoading] = useState(true);
 
-  useEffect(()=>{
-    console.log("Feedback Data");
-    console.log(feedbackData);
-    axios.get("https://getfeedbackdetails-710015716338.us-central1.run.app")
-    .then((res)=>{
+  const getFeedbackType = (feedBackFileName) => {
+    if (!feedBackFileName || typeof feedBackFileName !== "string") {
+      return "Unknown";
+    }
+    if (feedBackFileName.includes("glue")) return "JsonToCsv";
+    if (feedBackFileName.includes("txt")) return "TxtTransform";
+    return "Unknown";
+  };
+
+  useEffect(() => {
+    axios
+      .get("https://getfeedbackdetails-710015716338.us-central1.run.app")
+      .then((res) => {
         setFeedbackData(res.data);
-    })
-    .catch((err)=>{ console.log(err); });
-  },[])
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
-    <TableContainer component={Paper} sx={{ maxWidth: 800, margin: "auto", mt: 4 }}>
-      <Typography variant="h5" align="center" mt={2}>
+    <Box sx={{ maxWidth: "90%", margin: "auto", mt: 4 }}>
+      <Typography
+        variant="h4"
+        align="center"
+        gutterBottom
+        sx={{ fontWeight: "bold", color: "#1976d2" }}
+      >
         Feedback Results
       </Typography>
-<Table>
-<TableHead>
-  <TableRow>
-    <TableCell align="center"><strong>User Email</strong></TableCell>
-    <TableCell align="center"><strong>Process ID</strong></TableCell>
-    <TableCell align="center"><strong>Filename</strong></TableCell>
-    <TableCell align="center"><strong>Type</strong></TableCell>
-    <TableCell align="center"><strong>Feedback</strong></TableCell>
-    <TableCell align="center"><strong>Sentiment</strong></TableCell>
-  </TableRow>
-</TableHead>
+      <TableContainer component={Paper} elevation={4}>
+        <Table stickyHeader>
+          <TableHead>
+            <TableRow>
+              <TableCell align="center" sx={{ fontWeight: "bold", bgcolor: "#f5f5f5" }}>
+                User Email
+              </TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold", bgcolor: "#f5f5f5" }}>
+                Filename
+              </TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold", bgcolor: "#f5f5f5" }}>
+                Type
+              </TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold", bgcolor: "#f5f5f5" }}>
+                Feedback
+              </TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold", bgcolor: "#f5f5f5" }}>
+                Sentiment
+              </TableCell>
+            </TableRow>
+          </TableHead>
 
-<TableBody>
-          {feedbackData.map((feedback, index) => (
-            <TableRow key={index}>
-              <TableCell align="center">{feedback.userEmail}</TableCell>
-              <TableCell align="center">{feedback.process_id}</TableCell>
-              <TableCell align="center">{feedback.filename}</TableCell>
-              <TableCell align="center">{feedback.type}</TableCell>
-              <TableCell align="center">{feedback.feedback}</TableCell>
-              <TableCell align="center">
-                {feedback.score > 0
+          <TableBody>
+            {feedbackData.map((feedback, index) => (
+              <TableRow
+                key={index}
+                sx={{
+                  bgcolor: index % 2 === 0 ? "#f9f9f9" : "white",
+                  "&:hover": { backgroundColor: "#e0f7fa" },
+                }}
+              >
+                <TableCell align="center">{feedback.userEmail}</TableCell>
+                <TableCell align="center">
+                  <Tooltip title={feedback.filename} arrow>
+                    <span>{feedback.filename}</span>
+                  </Tooltip>
+                </TableCell>
+                <TableCell align="center">{getFeedbackType(feedback.type)}</TableCell>
+                <TableCell align="center">{feedback.feedback}</TableCell>
+                <TableCell align="center">
+                  {feedback.score > 0
                     ? "Positive"
                     : feedback.score < 0
                     ? "Negative"
                     : "Neutral"}
                 </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-
-</Table>
-</TableContainer>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
   );
 };
 
