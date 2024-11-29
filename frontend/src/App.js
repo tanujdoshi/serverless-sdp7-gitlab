@@ -12,6 +12,7 @@ import Chat from "./Components/Chat/Chat";
 import PubsubAgentHome from "./Components/PubSub/PubsubAgentHome";
 import Navbar from "./Components/Navbar/Navbar";
 import { UserProvider } from "./Components/Context/UserContext";
+import VirtualAssistant from "./Components/VirtualAssistant/Chat";
 
 function App() {
   const customerId = "testCustomerId";
@@ -29,6 +30,7 @@ function App() {
           <Route path="/json-to-csv" element={<JsonToCsvProcessor />} />
           <Route path="/txt-transform" element={<TxtTransform />} />
           <Route path="/word-cloud" element={<WordCloud />} />
+          <Route path="/virtual-assistant" element={<VirtualAssistant />} />
           <Route path="/" element={<Home />} />
           <Route path="/client" element={<PubsubClientHome />} />
           <Route path="/agent" element={<PubsubAgentHome />} />
