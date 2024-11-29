@@ -63,6 +63,20 @@ const FeedbackForm = () => {
         <Typography variant="h4" mb={2}>
           Submit Feedback
         </Typography>
+        <FormControl fullWidth sx={{ mb: 2 }}>
+          <InputLabel>Select Task</InputLabel>
+          <Select
+            value={selectedTask}
+            onChange={(e) => setSelectedTask(e.target.value)}
+            label="Select Task"
+          >
+            {tasks.map((task, index) => (
+              <MenuItem key={index} value={task}>
+                {`${task.process_id} - ${task.type} (${task.filename})`}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
       <Button
         variant="contained"
         color="primary"
@@ -71,6 +85,7 @@ const FeedbackForm = () => {
       >
         Submit
       </Button>
+      </Box>
     </div>
   );
 };
