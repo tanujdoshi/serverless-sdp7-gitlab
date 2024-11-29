@@ -30,6 +30,9 @@ function Navbar() {
             <Button color="inherit" component={Link} to="/word-cloud">
               Word cloud
             </Button>
+            <Button color="inherit" component={Link} to="/virtual-assistant">
+              Virtual Assistant
+            </Button>
             <Button color="inherit" onClick={onLogout}>
               Logout
             </Button>

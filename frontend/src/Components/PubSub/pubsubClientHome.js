@@ -31,7 +31,7 @@ import { UserContext } from "../Context/UserContext";
 
 
 
-const waitForFirestoreDocument = async (refrenceId) => {
+const waitForFirestoreDocument = async (referenceId) => {
   const maxRetries = 10; // Maximum retries for polling
   const delay = 1000; // Delay in milliseconds between each retry
   let retries = 0;
@@ -40,7 +40,7 @@ const waitForFirestoreDocument = async (refrenceId) => {
     try {
       const q = query(
           collection(db, "Concerns"),
-          where("refrenceId", "==", refrenceId) // Use "refrenceId" here
+          where("referenceId", "==", referenceId) // Use "refrenceId" here
       );
       const querySnapshot = await getDocs(q);
 
@@ -68,7 +68,7 @@ const PubsubClientHome = () => {
   const customerId = localStorage.getItem("userEmail");
   const [concernText, setConcernText] = useState("");
   // const [refrenceId, setRefrenceId] = useState("");
-  const [refrenceId, setRefrenceId] = useState("");
+  const [referenceId, setReferenceId] = useState("");
   const [error, setError] = useState(null);
   const [concerns, setConcerns] = useState([]); // State to hold the concerns data
   const [loading, setLoading] = useState(true);
@@ -94,7 +94,7 @@ const PubsubClientHome = () => {
   }, [customerId]);
 
   const handleChange = (event) => {
-    setRefrenceId(event.target.value);
+    setReferenceId(event.target.value);
     console.log("Selected Reference ID:", event.target.value);
   };
   useEffect(() => {
@@ -106,7 +106,7 @@ const PubsubClientHome = () => {
         // Query Firestore for concerns related to the current customer
         const q = query(
           collection(db, "Concerns"),
-          where("customerId", "==", customerId)
+          where("customerEmail", "==", customerId)
         );
         const querySnapshot = await getDocs(q);
 
@@ -132,9 +132,9 @@ const PubsubClientHome = () => {
   const createConcern = async () => {
     console.log("CustomerId:", customerId);
     console.log("ConcernText:", concernText);
-    console.log("Reference Id:", refrenceId);
+    console.log("Reference Id:", referenceId);
 
-    if (!customerId || !concernText || !refrenceId) {
+    if (!customerId || !concernText || !referenceId) {
       setError("Please provide all details.");
       return;
     }
@@ -145,7 +145,7 @@ const PubsubClientHome = () => {
       const payload = {
         name: userData.name, // Assuming customerId serves as the name
         email: customerId, // Assuming customer email is the same as ID
-        refrenceId: refrenceId, // Use "refrenceId" consistently
+        referenceId: referenceId, // Use "refrenceId" consistently
         concernText: concernText,
       };
 
@@ -158,7 +158,7 @@ const PubsubClientHome = () => {
       console.log("Concern successfully published with message ID:", response.data);
 
       // Wait for the Firestore document to be created by the subscribe function
-      const concernId = await waitForFirestoreDocument(refrenceId);
+      const concernId = await waitForFirestoreDocument(referenceId);
       console.log("Concern ID retrieved:", concernId);
 
       // Fetch the agent details from Firestore (optional)
@@ -220,7 +220,7 @@ const PubsubClientHome = () => {
               <FormControl fullWidth sx={{ mb: 2 }}>
                 <Select
                   labelId="reference-id-label"
-                  value={refrenceId}
+                  value={referenceId}
                   onChange={handleChange}
                   label="Reference ID"
                 >
@@ -309,10 +309,10 @@ const PubsubClientHome = () => {
                         variant="subtitle1"
                         sx={{ fontWeight: "bold" }}
                       >
-                        {concernDoc.concerntext}
+                        {concernDoc.concernText}
                       </Typography>
                     }
-                    secondary={`Reference ID: ${concernDoc.refrenceId}`}
+                    secondary={`Reference ID: ${concernDoc.referenceId}`}
                   />
                 </ListItem>
               ))}
