@@ -8,6 +8,7 @@ const FeedbackForm = () => {
   const [feedback, setFeedback] = useState("");
   const userEmail = localStorage.getItem("userEmail");
 
+  // Fetch tasks from the API when the component mounts
   useEffect(() => {
     axios
       .post("https://fsywgygjrg.execute-api.us-east-1.amazonaws.com/dev/dp/getAllByEmail", {
@@ -24,16 +25,18 @@ const FeedbackForm = () => {
       });
   }, []);
 
+   // Define a function to handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-
+     // Check if a task has been selected
     if (!selectedTask) {
       alert("Please select a task before submitting feedback.");
       return;
     }
 
+    // Extract task details from the selected task
     const { process_id, filename, type } = JSON.parse(selectedTask); // Parse the serialized task
-
+    // Submit the feedback to the API
     axios
       .post(
         "https://us-central1-serverless-pro-442123.cloudfunctions.net/addfeedback",
@@ -50,7 +53,7 @@ const FeedbackForm = () => {
           },
         }
       )
-      .then(() => {
+      .then(() => { // Handle successful feedback submission
         alert("Feedback submitted!");
         setSelectedTask("");
         setFeedback("");
