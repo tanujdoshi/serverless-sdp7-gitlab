@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useContext} from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -32,7 +32,6 @@ import {
 } from "../Chat/firebase";
 import { UserContext } from "../Context/UserContext";
 
-
 const PubsubAgentHome = () => {
   const { userData } = useContext(UserContext);
   const agentId = localStorage.getItem("userEmail");
@@ -47,19 +46,18 @@ const PubsubAgentHome = () => {
   const [messages, setMessages] = useState([]); // Messages for the selected concern
   const navigate = useNavigate();
 
-
   // Fetch assigned and raised concerns
   useEffect(() => {
     const fetchConcerns = async () => {
       setLoading(true);
       try {
         const qAssigned = query(
-            collection(db, "Concerns"),
-            where("agentEmail", "==", agentId) // Concerns assigned to the agent
+          collection(db, "Concerns"),
+          where("agentEmail", "==", agentId) // Concerns assigned to the agent
         );
         const qRaised = query(
-            collection(db, "Concerns"),
-            where("customerEmail", "==", agentId) // Concerns raised by the agent
+          collection(db, "Concerns"),
+          where("customerEmail", "==", agentId) // Concerns raised by the agent
         );
 
         const [assignedSnapshot, raisedSnapshot] = await Promise.all([
@@ -100,7 +98,6 @@ const PubsubAgentHome = () => {
     fetchDataProcess();
   }, [agentId]);
 
-
   const waitForFirestoreDocument = async (referenceId) => {
     const maxRetries = 10; // Maximum retries
     const delay = 1000; // 1 second delay
@@ -109,8 +106,8 @@ const PubsubAgentHome = () => {
     while (retries < maxRetries) {
       try {
         const q = query(
-            collection(db, "Concerns"),
-            where("referenceId", "==", referenceId) // Match the referenceId
+          collection(db, "Concerns"),
+          where("referenceId", "==", referenceId) // Match the referenceId
         );
         const querySnapshot = await getDocs(q);
 
@@ -141,13 +138,13 @@ const PubsubAgentHome = () => {
       };
 
       const response = await axios.post(
-          "https://us-central1-serverless-project-439901.cloudfunctions.net/publishConcern",
-          payload,
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
+        "https://us-central1-serverless-project-439901.cloudfunctions.net/publishConcern",
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
 
       console.log(`Concern published successfully: ${response.data}`);
@@ -162,10 +159,9 @@ const PubsubAgentHome = () => {
       const docSnapshot = await getDoc(doc(db, "Concerns", concernId));
       const concernData = docSnapshot.data();
 
-      console.log("concernData:", concernData)
+      console.log("concernData:", concernData);
 
       console.log("00000 Concern ID retrieved:", concernId);
-
 
       // Redirect to the Chat component
       navigate("/chat", {
@@ -181,9 +177,19 @@ const PubsubAgentHome = () => {
     }
   };
 
-
+  const getMessanger = (msg) => {
+    if (msg.senderId == agentId) {
+      return "You";
+    } else {
+      if (selectedConcern.agentEmail == agentId) {
+        return selectedConcern.customerName;
+      }
+      return selectedConcern.agentName;
+    }
+  };
 
   const handleConcernClick = async (concern) => {
+    console.log("concern", concern);
     setSelectedConcern(concern);
     setMessages([]); // Clear previous messages
 
@@ -194,6 +200,7 @@ const PubsubAgentHome = () => {
     );
     const querySnapshot = await getDocs(messagesQuery);
     const concernMessages = querySnapshot.docs.map((doc) => doc.data());
+    console.log("concernMessages", concernMessages);
     setMessages(concernMessages);
   };
 
@@ -202,13 +209,20 @@ const PubsubAgentHome = () => {
 
     try {
       // Add the new message to the "messages" subcollection under the selected concern
+      let type = "";
+      if (selectedConcern.agentEmail == agentId) {
+        type = "agent";
+      } else if (selectedConcern.customerEmail == agentId) {
+        type = "customer";
+      }
+      console.log("Hereeee 123", type);
       await addDoc(
         collection(doc(db, "Concerns", selectedConcern.id), "messages"),
         {
           text: concernText,
           senderId: agentId,
           timestamp: new Date(),
-          type: "agent", // Type can be "agent" or "customer",
+          type: type, // Type can be "agent" or "customer",
           receiverId: selectedConcern.customerEmail,
         }
       );
@@ -320,30 +334,30 @@ const PubsubAgentHome = () => {
         <CardHeader title="Assigned Concerns" />
         <CardContent>
           {loading ? (
-              <Typography>Loading assigned concerns...</Typography>
+            <Typography>Loading assigned concerns...</Typography>
           ) : assignedConcerns.length === 0 ? (
-              <Typography>No concerns assigned to you.</Typography>
+            <Typography>No concerns assigned to you.</Typography>
           ) : (
-              <List>
-                {assignedConcerns.map((concern) => (
-                    <ListItem
-                        key={concern.id}
-                        button
-                        onClick={() => handleConcernClick(concern)}
-                        sx={{
-                          mb: 1,
-                          border: "1px solid #ddd",
-                          borderRadius: 1,
-                          p: 1.5,
-                        }}
-                    >
-                      <ListItemText
-                          primary={concern.concernText}
-                          secondary={`Reference ID: ${concern.referenceId}`}
-                      />
-                    </ListItem>
-                ))}
-              </List>
+            <List>
+              {assignedConcerns.map((concern) => (
+                <ListItem
+                  key={concern.id}
+                  button
+                  onClick={() => handleConcernClick(concern)}
+                  sx={{
+                    mb: 1,
+                    border: "1px solid #ddd",
+                    borderRadius: 1,
+                    p: 1.5,
+                  }}
+                >
+                  <ListItemText
+                    primary={concern.concernText}
+                    secondary={`Reference ID: ${concern.referenceId}`}
+                  />
+                </ListItem>
+              ))}
+            </List>
           )}
         </CardContent>
       </Card>
@@ -352,30 +366,30 @@ const PubsubAgentHome = () => {
         <CardHeader title="Raised Concerns" />
         <CardContent>
           {loading ? (
-              <Typography>Loading raised concerns...</Typography>
+            <Typography>Loading raised concerns...</Typography>
           ) : raisedConcerns.length === 0 ? (
-              <Typography>No concerns raised by you.</Typography>
+            <Typography>No concerns raised by you.</Typography>
           ) : (
-              <List>
-                {raisedConcerns.map((concern) => (
-                    <ListItem
-                        key={concern.id}
-                        button
-                        onClick={() => handleConcernClick(concern)}
-                        sx={{
-                          mb: 1,
-                          border: "1px solid #ddd",
-                          borderRadius: 1,
-                          p: 1.5,
-                        }}
-                    >
-                      <ListItemText
-                          primary={concern.concernText}
-                          secondary={`Reference ID: ${concern.referenceId}`}
-                      />
-                    </ListItem>
-                ))}
-              </List>
+            <List>
+              {raisedConcerns.map((concern) => (
+                <ListItem
+                  key={concern.id}
+                  button
+                  onClick={() => handleConcernClick(concern)}
+                  sx={{
+                    mb: 1,
+                    border: "1px solid #ddd",
+                    borderRadius: 1,
+                    p: 1.5,
+                  }}
+                >
+                  <ListItemText
+                    primary={concern.concernText}
+                    secondary={`Reference ID: ${concern.referenceId}`}
+                  />
+                </ListItem>
+              ))}
+            </List>
           )}
         </CardContent>
       </Card>
@@ -389,24 +403,31 @@ const PubsubAgentHome = () => {
           <CardContent>
             <List sx={{ maxHeight: 300, overflowY: "auto", mb: 2 }}>
               {messages.map((msg, index) => (
-                <ListItem key={index}>
-                  <Typography
-                    variant="body2"
+                <>
+                  <ListItem
+                    key={index}
                     sx={{
-                      backgroundColor:
-                        msg.senderId === agentId ? "#e3f2fd" : "#f1f8e9",
+                      justifyContent:
+                        getMessanger(msg) == "You" ? "flex-end" : "flex-start",
                       p: 1,
-                      borderRadius: 1,
-                      display: "inline-block",
-                      maxWidth: "75%",
+                      display: "flex",
                     }}
                   >
-                    <strong>
-                      {msg.senderId === agentId ? "You" : "Customer"}:
-                    </strong>{" "}
-                    {msg.text}
-                  </Typography>
-                </ListItem>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        backgroundColor:
+                          msg.senderId === agentId ? "#e3f2fd" : "#f1f8e9",
+                        p: 1,
+                        borderRadius: 1,
+                        display: "inline-block",
+                        maxWidth: "75%",
+                      }}
+                    >
+                      <strong>{getMessanger(msg)}:</strong> {msg.text}
+                    </Typography>
+                  </ListItem>
+                </>
               ))}
             </List>
             <TextField
