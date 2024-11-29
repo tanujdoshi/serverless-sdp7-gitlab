@@ -31,6 +31,26 @@ const FeedbackTable = () => {
     <TableCell align="center"><strong>Sentiment</strong></TableCell>
   </TableRow>
 </TableHead>
+
+<TableBody>
+          {feedbackData.map((feedback, index) => (
+            <TableRow key={index}>
+              <TableCell align="center">{feedback.userEmail}</TableCell>
+              <TableCell align="center">{feedback.process_id}</TableCell>
+              <TableCell align="center">{feedback.filename}</TableCell>
+              <TableCell align="center">{feedback.type}</TableCell>
+              <TableCell align="center">{feedback.feedback}</TableCell>
+              <TableCell align="center">
+                {feedback.score > 0
+                    ? "Positive"
+                    : feedback.score < 0
+                    ? "Negative"
+                    : "Neutral"}
+                </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+        
 </Table>
 </TableContainer>
   );
