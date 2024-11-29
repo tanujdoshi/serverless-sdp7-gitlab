@@ -1,5 +1,6 @@
 import React from "react";
 
+import { TableContainer, Paper, Typography } from "@mui/material";
 
 const FeedbackTable = () => {
 
@@ -19,7 +20,19 @@ const FeedbackTable = () => {
       <Typography variant="h5" align="center" mt={2}>
         Feedback Results
       </Typography>
-    </TableContainer>
+<Table>
+<TableHead>
+  <TableRow>
+    <TableCell align="center"><strong>User Email</strong></TableCell>
+    <TableCell align="center"><strong>Process ID</strong></TableCell>
+    <TableCell align="center"><strong>Filename</strong></TableCell>
+    <TableCell align="center"><strong>Type</strong></TableCell>
+    <TableCell align="center"><strong>Feedback</strong></TableCell>
+    <TableCell align="center"><strong>Sentiment</strong></TableCell>
+  </TableRow>
+</TableHead>
+</Table>
+</TableContainer>
   );
 };
 
