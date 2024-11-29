@@ -49,6 +49,19 @@ const FeedbackForm = () => {
 
   return (
     <div style={{ padding: "40px" }}>
+      <Box
+        sx={{
+          maxWidth: 600,
+          margin: "auto",
+          padding: 4,
+          backgroundColor: "#f9f9f9",
+          borderRadius: 2,
+          boxShadow: 3,
+        }}
+      >
+        <Typography variant="h4" mb={2}>
+          Submit Feedback
+        </Typography>
       <Button
         variant="contained"
         color="primary"
