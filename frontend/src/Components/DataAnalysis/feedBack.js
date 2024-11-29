@@ -1,54 +1,72 @@
-import {React} from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useState, useEffect } from "react";
 import { TextField, Button, MenuItem, Box, Typography, Select, FormControl, InputLabel } from "@mui/material";
 
-
 const FeedbackForm = () => {
-    const [tasks, setTasks] = useState([]);
-    const [selectedTask, setSelectedTask] = useState("");
-    const [feedback, setFeedback] = useState("");
+  const [tasks, setTasks] = useState([]);
+  const [selectedTask, setSelectedTask] = useState("");
+  const [feedback, setFeedback] = useState("");
+  const userEmail = localStorage.getItem("userEmail");
 
-    const userEmail = localStorage.getItem("userEmail");
-    useEffect(()=>{
-        axios.get(
-  "https://kdhprlykjeacymoqef22co3ie40unnqa.lambda-url.us-east-1.on.aws/",
-  { userEmail },
-  {
-    headers: {
-      "Content-Type": "application/json", // Set only if necessary
-    },
-  }
-)       .then((res)=>{
-            setTasks(res.data);
-        })
-        .catch((err)=>{
-            console.log(err);
-        })
-    },[])
+  useEffect(() => {
+    axios.post(
+      "https://fsywgygjrg.execute-api.us-east-1.amazonaws.com/dev/dp/getAllByEmail",
+      { userEmail }
+    )
+    .then((res) => {
+      // Add error checking and logging
+      console.log("Full response:", res);
+      console.log("Response data:", res.data);
+      
+      const fetchedTasks = Array.isArray(res.data.body) ? res.data.body : [];
+      setTasks(fetchedTasks);
+    })
+    .catch((err) => {
+      console.error("Error fetching tasks:", err);
+      setTasks([]);
+    });
+  }, []);
 
-    const handleSubmit = (e) => {  
-        e.preventDefault();
-        const {process_id, filename, type} = selectedTask;
-        axios
-        .post("https://us-central1-serverless-pro-442123.cloudfunctions.net/feedd3", {
-          userEmail: userEmail,
-          process_id,
-          fileName:filename,
-          dpType:type,
-          feed:feedback,
-        },{
-            headers: {
-                "Content-Type": "application/json", // Set only if necessary
-            },
-        })
-        .then(() => alert("Feedback submitted!"))
-        .catch((error) => console.error(error));
-    };
+  const handleSubmit = (e) => {
+    e.preventDefault();
     
-    return(
-        <div style={{padding:"40px"}}>
-        <Box
+    // Add validation to ensure a task is selected
+    if (!selectedTask) {
+      alert("Please select a task before submitting feedback.");
+      return;
+    }
+
+    const { process_id, filename, type } = selectedTask;
+    
+    axios.post(
+      "https://us-central1-serverless-pro-442123.cloudfunctions.net/feedd3", 
+      {
+        userEmail: userEmail,
+        process_id,
+        fileName: filename,
+        dpType: type,
+        feed: feedback,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    )
+    .then(() => {
+      alert("Feedback submitted!");
+      setSelectedTask("");
+      setFeedback("");
+    })
+    .catch((error) => {
+      console.error("Submission error:", error);
+      alert("Failed to submit feedback. Please try again.");
+    });
+  };
+
+  return (
+    <div style={{padding:"40px"}}>
+      <Box
         sx={{
           maxWidth: 600,
           margin: "auto",
@@ -68,11 +86,15 @@ const FeedbackForm = () => {
             onChange={(e) => setSelectedTask(e.target.value)}
             label="Select Task"
           >
-            {tasks.map((task, index) => (
-              <MenuItem key={index} value={task}>
-                {`${task.process_id} - ${task.type} (${task.filename})`}
-              </MenuItem>
-            ))}
+            {tasks.length === 0 ? (
+              <MenuItem value="">No tasks found</MenuItem>
+            ) : (
+              tasks.map((task, index) => (
+                <MenuItem key={index} value={task}>
+                  {`${task.process_id} - ${task.type} (${task.filename})`}
+                </MenuItem>
+              ))
+            )}
           </Select>
         </FormControl>
         <TextField
@@ -85,14 +107,17 @@ const FeedbackForm = () => {
           variant="outlined"
           sx={{ mb: 2 }}
         />
-        <Button variant="contained" color="primary" onClick={handleSubmit} fullWidth>
+        <Button 
+          variant="contained" 
+          color="primary" 
+          onClick={handleSubmit} 
+          fullWidth
+        >
           Submit
         </Button>
       </Box>
-      </div>
-
-    )
-
-}
+    </div>
+  );
+};
 
 export default FeedbackForm;
