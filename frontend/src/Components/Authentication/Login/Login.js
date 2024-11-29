@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import AWS from "aws-sdk";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -21,12 +21,13 @@ import { UserContext } from "../../Context/UserContext";
 
 function Login() {
   const { loginUser } = useContext(UserContext);
-
   const navigate = useNavigate();
-  const steps = ["Personal Details", "Security Quesiton", "Math"];
+
+  const steps = ["Personal Details", "Security Question", "Math"];
   const [errors, setErrors] = useState({});
   const [step, setStep] = useState(1);
   const [token, setToken] = useState({});
+  const [role, setRole] = useState(null); // State to track role
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -36,6 +37,7 @@ function Login() {
     userIdCaptcha: uuidv4().substring(0, 6),
     captchaAnswer: "",
   });
+
   const cognito = new AWS.CognitoIdentityServiceProvider({
     region: "us-east-1",
     apiVersion: "2016-04-18",
@@ -98,18 +100,18 @@ function Login() {
           setStep((prevStep) => prevStep + 1);
         }
       } catch (err) {
-        console.error("Sign in err", err);
+        console.error("Sign in error:", err);
         if (err.code === "NotAuthorizedException") {
-          toast.error("Incorrect email / password.");
+          toast.error("Incorrect email/password.");
         } else {
-          toast.error("Something went wrong");
+          toast.error("Something went wrong.");
         }
       }
     } else if (step === 2) {
       if (formData.securityAnswerExpected === formData.securityAnswerWritten) {
         setStep((prevStep) => prevStep + 1);
       } else {
-        toast.error("Answer does not match");
+        toast.error("Answer does not match.");
       }
     } else if (step === 3) {
       const body = {
@@ -121,7 +123,7 @@ function Login() {
         "https://0u3r8l69m5.execute-api.us-east-1.amazonaws.com/dev1/ValidateAnswer",
         body
       );
-      if (response.data.statusCode != 200) {
+      if (response.data.statusCode !== 200) {
         toast.error("Incorrect answer. Please try again.");
         return;
       }
@@ -134,7 +136,32 @@ function Login() {
       );
 
       loginUser(formData.email);
-
+      console.log("role:", role);
+      try {
+        const userData = await axios.post(
+          "https://fsywgygjrg.execute-api.us-east-1.amazonaws.com/dev/login/userDetails",
+          { email: formData.email }
+        );
+        console.log("userData:", userData.data.body);
+        console.log("role:", userData.data.body.role);
+        const userDataBody = JSON.parse(userData.data.body);
+        const fetchedRole = userDataBody.role;
+        if(fetchedRole){
+          const res = await axios.post(
+            "https://us-central1-serverless-pro-442123.cloudfunctions.net/logindata",
+            {
+              email: formData.email,
+              role:fetchedRole,
+            }
+          );
+          console.log("aa:", res.data);
+        }
+        setRole(fetchedRole); // Set the role, triggers useEffect
+      } catch (err) {
+        console.error("Error fetching user details:", err);
+        toast.error("Failed to fetch user details.");
+      }
+      console.log("role now", role);
       navigate("/");
     }
   };
@@ -176,6 +203,7 @@ function Login() {
         return null;
     }
   };
+
   return (
     <>
       <ToastContainer />
