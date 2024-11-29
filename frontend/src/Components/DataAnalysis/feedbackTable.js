@@ -15,7 +15,11 @@ const FeedbackTable = () => {
     .catch((err)=>{ console.log(err); });
   },[])
   return (
-    <h1>Feedback Table</h1>
+    <TableContainer component={Paper} sx={{ maxWidth: 800, margin: "auto", mt: 4 }}>
+      <Typography variant="h5" align="center" mt={2}>
+        Feedback Results
+      </Typography>
+    </TableContainer>
   );
 };
 
