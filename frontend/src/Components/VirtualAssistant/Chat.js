@@ -76,17 +76,17 @@ const Chat = () => {
       my={2}
       borderRadius={12}
       bgcolor="#ffffff"
-      boxShadow="0 4px 15px rgba(0, 0, 0, 0.2)" // Subtle shadow
-      border="1px solid #e0e0e0" // Light gray border
+      boxShadow="0 4px 15px rgba(0, 0, 0, 0.2)" 
+      border="1px solid #e0e0e0" 
     >
-      {/* Header */}
+  
       <Box
         width="100%"
         py={2}
         px={2}
-        bgcolor="#f9f9f9" // Slightly off-white header background
+        bgcolor="#f9f9f9" 
         borderRadius="12px 12px 0 0"
-        borderBottom="1px solid #e0e0e0" // Aligns with box border
+        borderBottom="1px solid #e0e0e0" 
         boxShadow="0 1px 3px rgba(0,0,0,0.1)"
       >
         <Typography variant="h6" color="primary" align="center">
@@ -94,7 +94,6 @@ const Chat = () => {
         </Typography>
       </Box>
 
-      {/* Chat Messages */}
       <Box
         flex={1}
         width="100%"
@@ -135,7 +134,7 @@ const Chat = () => {
                         borderRadius: '15px 15px 15px 0',
                         maxWidth: '75%',
                         wordWrap: 'break-word',
-                        border: '1px solid #e0e0e0', // Consistent bubble border
+                        border: '1px solid #e0e0e0',
                       }}
                     >
                       <Typography style={{ fontSize: '14px', color: '#333' }}>{message.text}</Typography>
@@ -156,7 +155,7 @@ const Chat = () => {
                         borderRadius: '15px 15px 0 15px',
                         maxWidth: '75%',
                         wordWrap: 'break-word',
-                        border: '1px solid #e0e0e0', // Consistent bubble border
+                        border: '1px solid #e0e0e0', 
                       }}
                     >
                       <Typography style={{ fontSize: '14px', color: '#333' }}>{message.text}</Typography>
@@ -169,12 +168,11 @@ const Chat = () => {
         )}
       </Box>
 
-      {/* Input Area */}
       <Box
         width="100%"
         display="flex"
         alignItems="center"
-        bgcolor="#f9f9f9" // Slightly off-white input background
+        bgcolor="#f9f9f9" 
         borderTop="1px solid #e0e0e0"
         p={2}
         borderRadius="0 0 12px 12px"
