@@ -39,6 +39,9 @@ function Navbar() {
             <Button color="inherit" component={Link} to="/admin">
               Admin
             </Button>
+            <Button color="inherit" component={Link} to="/virtual-assistant">
+              Virtual Assistant
+            </Button>
             <Button color="inherit" onClick={onLogout}>
               Logout
             </Button>

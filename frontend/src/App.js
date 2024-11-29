@@ -15,8 +15,10 @@ import Feedback from "./Components/DataAnalysis/feedBack";
 import { UserProvider } from "./Components/Context/UserContext";
 import FeedbackTable from "./Components/DataAnalysis/feedbackTable";
 import AdminPage from "./Components/DataAnalysis/admin";
+import VirtualAssistant from "./Components/VirtualAssistant/Chat";
+
 function App() {
-  const customerId = "testCustomerId";
+  // const customerId = "testCustomerId";
   const agentId = "testAgentId";
   const isAgent = false;
 
@@ -31,6 +33,7 @@ function App() {
           <Route path="/json-to-csv" element={<JsonToCsvProcessor />} />
           <Route path="/txt-transform" element={<TxtTransform />} />
           <Route path="/word-cloud" element={<WordCloud />} />
+          <Route path="/virtual-assistant" element={<VirtualAssistant />} />
           <Route path="/" element={<Home />} />
           <Route path="/client" element={<PubsubClientHome />} />
           <Route path="/agent" element={<PubsubAgentHome />} />
@@ -48,7 +51,7 @@ function App() {
           <Route
             path="/chat"
             element={
-              <Chat userId={isAgent ? agentId : customerId} isAgent={isAgent} />
+              <Chat />
             }
           />
           <Route
