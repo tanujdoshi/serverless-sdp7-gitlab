@@ -30,6 +30,15 @@ function Navbar() {
             <Button color="inherit" component={Link} to="/word-cloud">
               Word cloud
             </Button>
+            <Button color="inherit" component={Link} to="/feedbackform">
+              DP Feedback Form
+            </Button>
+            <Button color="inherit" component={Link} to="/feedbacktable">
+            DP Feedback Table
+            </Button>
+            <Button color="inherit" component={Link} to="/admin">
+              Admin
+            </Button>
             <Button color="inherit" onClick={onLogout}>
               Logout
             </Button>
