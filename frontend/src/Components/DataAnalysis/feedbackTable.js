@@ -14,10 +14,17 @@ import {
 } from "@mui/material";
 import axios from "axios";
 
+// Define the FeedbackTable component
 const FeedbackTable = () => {
+  // Initialize state variables to store feedback data and loading status
   const [feedbackData, setFeedbackData] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  /**
+   * Determine the feedback type based on the filename
+   * @param {string} feedBackFileName - The filename to check
+   * @returns {string} The feedback type (e.g. "JsonToCsv", "TxtTransform", or "Unknown")
+   */
   const getFeedbackType = (feedBackFileName) => {
     if (!feedBackFileName || typeof feedBackFileName !== "string") {
       return "Unknown";
@@ -27,11 +34,14 @@ const FeedbackTable = () => {
     return "Unknown";
   };
 
+  // Fetch feedback data from the API when the component mounts
   useEffect(() => {
     axios
       .get("https://getfeedbackdetails-710015716338.us-central1.run.app")
       .then((res) => {
+        // Update the feedback data state variable
         setFeedbackData(res.data);
+        // Set loading to false
         setLoading(false);
       })
       .catch((err) => {
@@ -40,6 +50,7 @@ const FeedbackTable = () => {
       });
   }, []);
 
+  // Display a loading indicator if the data is still being fetched
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
@@ -48,6 +59,7 @@ const FeedbackTable = () => {
     );
   }
 
+  // Render the feedback table
   return (
     <Box sx={{ maxWidth: "90%", margin: "auto", mt: 4 }}>
       <Typography
