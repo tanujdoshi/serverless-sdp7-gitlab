@@ -11,8 +11,10 @@ import Confirmation from "./Components/Authentication/Register/Confirmation";
 import Chat from "./Components/Chat/Chat";
 import PubsubAgentHome from "./Components/PubSub/PubsubAgentHome";
 import Navbar from "./Components/Navbar/Navbar";
+import Feedback from "./Components/DataAnalysis/feedBack";
 import { UserProvider } from "./Components/Context/UserContext";
-
+import FeedbackTable from "./Components/DataAnalysis/feedbackTable";
+import AdminPage from "./Components/DataAnalysis/admin";
 function App() {
   const customerId = "testCustomerId";
   const agentId = "testAgentId";
@@ -32,6 +34,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/client" element={<PubsubClientHome />} />
           <Route path="/agent" element={<PubsubAgentHome />} />
+          <Route path="/admin" element={<AdminPage />} />
           {/* <Route
             path="/"
             element={
@@ -52,7 +55,12 @@ function App() {
             path="/agent-home"
             element={<PubsubAgentHome agentId={agentId} />}
           />
-        </Routes>
+          <Route 
+            path="/feedbackform"
+            element={<Feedback />}
+          />   
+          <Route path="/feedbacktable" element={<FeedbackTable />} /> 
+          </Routes>
       </Router>
     </UserProvider>
   );
