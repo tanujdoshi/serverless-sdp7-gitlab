@@ -15,7 +15,7 @@ import { UserProvider } from "./Components/Context/UserContext";
 import VirtualAssistant from "./Components/VirtualAssistant/Chat";
 
 function App() {
-  const customerId = "testCustomerId";
+  // const customerId = "testCustomerId";
   const agentId = "testAgentId";
   const isAgent = false;
 
@@ -47,7 +47,7 @@ function App() {
           <Route
             path="/chat"
             element={
-              <Chat userId={isAgent ? agentId : customerId} isAgent={isAgent} />
+              <Chat />
             }
           />
           <Route

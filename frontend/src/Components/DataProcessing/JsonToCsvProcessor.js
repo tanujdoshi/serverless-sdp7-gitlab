@@ -32,8 +32,8 @@ const JsonToCsvProcessor = () => {
         return <Chip label="Completed" color="success" />;
       case "in_progress":
         return <Chip label="In Progress" color="warning" />;
-      case "error":
-        return <Chip label="Error" color="error" />;
+      case "Failed":
+        return <Chip label="Failed" color="error" />;
       default:
         return <Chip label="Unknown" />;
     }
@@ -81,13 +81,12 @@ const JsonToCsvProcessor = () => {
     setUploading(true);
 
     try {
-      const url = await getUploadedFileUrl(file);
-      // console.log("url", url);
-      const body = {
-        user_email: localStorage.getItem("userEmail"),
-        s3_location: url,
-      };
-      await processGlueJob(body);
+      await getUploadedFileUrl(file, "glue");
+      // const body = {
+      //   user_email: localStorage.getItem("userEmail"),
+      //   s3_location: url,
+      // };
+      // await processGlueJob(body);
 
       // Mock response handling; ideally, this would come from the backend
       // const newStatus = {

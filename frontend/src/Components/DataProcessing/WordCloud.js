@@ -22,8 +22,7 @@ const WordCloud = () => {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [wordCloudData, setWordCloudData] = useState({});
-  // const email = localStorage.getItem("userEmail");
-  const email = "doshitanuj3012@gmail.com";
+  const email = localStorage.getItem("userEmail");
 
   const getStatusLabel = (status) => {
     switch (status) {
@@ -64,7 +63,7 @@ const WordCloud = () => {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("email", "doshitanuj3012@gmail.com");
+      formData.append("email", email);
 
       await gcpWordCloud(formData);
     } catch (error) {
