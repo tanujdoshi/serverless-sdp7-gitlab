@@ -1,4 +1,6 @@
 import React from "react";
+import { UserContext } from "../Context/UserContext";
+import { Typography, Button, Container, Paper, CircularProgress } from "@mui/material";
 
 const AdminPage = () => {
   const { userData, isLoggedIn } = useContext(UserContext);
@@ -20,7 +22,6 @@ const AdminPage = () => {
     return (
       <Container maxWidth="sm" sx={{ mt: 10, textAlign: "center" }}>
         <Paper elevation={3} sx={{ p: 4 }}>
-          <ErrorOutlineIcon color="error" sx={{ fontSize: 50 }} />
           <Typography variant="h5" color="error" gutterBottom>
             Access Denied
           </Typography>
@@ -41,7 +42,28 @@ const AdminPage = () => {
   }
 
   return (
-    <h1>Admin Dashboard</h1>
+    <Container sx={{ mt: 5, textAlign: "center" }}>
+    <Typography
+      variant="h4"
+      sx={{ mb: 3, display: "flex", alignItems: "center", justifyContent: "center", gap: 1 }}
+    >
+      Admin Dashboard
+    </Typography>
+    <Paper
+      elevation={4}
+      sx={{ p: 2, backgroundColor: "#f9f9f9", borderRadius: 2 }}
+    >
+      <iframe
+        title="Looker Studio Report"
+        width="100%"
+        height="600"
+        src="https://lookerstudio.google.com/embed/reporting/21b87354-584b-4f56-a695-e13595b025d3/page/aczWE"
+        style={{ borderRadius: "8px", border: "2px solid #ccc" }}
+        allowFullScreen
+        sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+      />
+    </Paper>
+  </Container>
   );
 };
 
