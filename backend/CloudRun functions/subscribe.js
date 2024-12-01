@@ -4,7 +4,7 @@ const axios = require('axios');
 
 const firestore = new Firestore();
 
-const API_GATEWAY_URL = "https://5q5nra43v3.execute-api.us-east-1.amazonaws.com/dev/random-agent";
+const API_GATEWAY_URL = "https://fsywgygjrg.execute-api.us-east-1.amazonaws.com/dev/agent/getRandom";
 
 async function fetchAgent() {
   try {
@@ -28,16 +28,13 @@ functions.cloudEvent('helloPubSub', async (cloudEvent) => {
   console.log(`Hello, ${name}!`);
 
   try {
-    console.log("data::::::::::::::::::::::::::::::"+data);
     const { name, email, referenceId, concernText } = data;
-    console.log("customerName::::::::::::::::::::::::::::::"+name);
 
     const agentData = await fetchAgent();
 
     // Firestore reference for the 'Concerns' collection
     const concernRef = firestore.collection('Concerns').doc();
 
-    // Schema
     const concernData = {
       concernId: concernRef.id,
       customerName: name,
@@ -46,7 +43,6 @@ functions.cloudEvent('helloPubSub', async (cloudEvent) => {
       concernText,
       agentName: agentData.name,
       agentEmail: agentData.userId,
-      //isActive: true
     };
 
     await concernRef.set(concernData);
