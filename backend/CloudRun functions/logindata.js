@@ -6,17 +6,13 @@ const firestore = new Firestore();
 const bigquery = new BigQuery();
 
 functions.http('logUserLogin', async (req, res) => {
-    //   res.send(`Hello ${req.query.name || req.body.name || 'World'}!`);
 
-
-// Add CORS headers to the response
   res.set('Access-Control-Allow-Origin', '*');
   res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.set('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Handle preflight OPTIONS request
   if (req.method === 'OPTIONS') {
-    return res.status(204).send(''); // Send an empty response for preflight requests
+    return res.status(204).send(''); 
   }
   
   try {
