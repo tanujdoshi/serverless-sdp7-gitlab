@@ -38,12 +38,3 @@ export {
   getDoc
 };
 
-// Allow only authenticated users
-// rules_version = '2';
-// service cloud.firestore {
-//   match /databases/{database}/documents {
-//     match /Concerns/{document=**} {
-//       allow read, write: if request.auth != null;
-//     }
-//   }
-// }
