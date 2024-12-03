@@ -90,8 +90,8 @@ const PubsubAgentHome = () => {
   }, [agentId]);
 
   const waitForFirestoreDocument = async (referenceId) => {
-    const maxRetries = 10; // Maximum retries
-    const delay = 1000; // 1 second delay
+    const maxRetries = 10;
+    const delay = 1000;
     let retries = 0;
 
     while (retries < maxRetries) {
@@ -122,8 +122,8 @@ const PubsubAgentHome = () => {
 
     try {
       const payload = {
-        name: userData.name, // The agent's name
-        email: agentId, // The agent's email
+        name: userData.name,
+        email: agentId,
         referenceId: referenceId,
         concernText: concernText,
       };
@@ -141,12 +141,10 @@ const PubsubAgentHome = () => {
       console.log(`Concern published successfully: ${response.data}`);
       setConcernText("");
 
-      // Wait for Firestore document creation
       const concernId = await waitForFirestoreDocument(referenceId);
 
       console.log("Concern ID retrieved:", concernId);
 
-      // Retrieve the Firestore document details
       const docSnapshot = await getDoc(doc(db, "Concerns", concernId));
       const concernData = docSnapshot.data();
 
@@ -154,7 +152,6 @@ const PubsubAgentHome = () => {
 
       console.log("00000 Concern ID retrieved:", concernId);
 
-      // Redirect to the Chat component
       navigate("/chat", {
         state: {
           concernId: concernId,
@@ -182,12 +179,12 @@ const PubsubAgentHome = () => {
   const handleConcernClick = async (concern) => {
     console.log("concern", concern);
     setSelectedConcern(concern);
-    setMessages([]); // Clear previous messages
+    setMessages([]);
 
     // Fetch the messages for the selected concern, ordered by timestamp
     const messagesQuery = query(
       collection(doc(db, "Concerns", concern.id), "messages"),
-      orderBy("timestamp") // Order by timestamp field
+      orderBy("timestamp")
     );
     const querySnapshot = await getDocs(messagesQuery);
     const concernMessages = querySnapshot.docs.map((doc) => doc.data());
@@ -218,22 +215,21 @@ const PubsubAgentHome = () => {
           text: concernText,
           senderId: agentId,
           timestamp: new Date(),
-          type: type, // Type can be "agent" or "customer",
+          type: type,
           receiverId: selectedConcern.customerEmail,
         }
       );
 
-      // Optionally, update the concern status if necessary
       await updateDoc(doc(db, "Concerns", selectedConcern.id), {
-        isActive: false, // Set concern to inactive after reply (if required)
+        isActive: false,
       });
 
-      setConcernText(""); // Clear the input after sending
+      setConcernText("");
 
       // Reload messages ordered by timestamp
       const messagesQuery = query(
         collection(doc(db, "Concerns", selectedConcern.id), "messages"),
-        orderBy("timestamp") // Order by timestamp field
+        orderBy("timestamp")
       );
       const querySnapshot = await getDocs(messagesQuery);
       const concernMessages = querySnapshot.docs.map((doc) => doc.data());
@@ -250,7 +246,7 @@ const PubsubAgentHome = () => {
     <Box
       sx={{
         p: 4,
-        maxWidth: 1200, // Increased width
+        maxWidth: 1200,
         mx: "auto",
         backgroundColor: "#f9f9f9",
         borderRadius: 3,
@@ -261,7 +257,7 @@ const PubsubAgentHome = () => {
         variant="h4"
         sx={{
           fontWeight: "bold",
-          mb: 5, // Increased space after the header
+          mb: 5,
           textAlign: "center",
         }}
       >

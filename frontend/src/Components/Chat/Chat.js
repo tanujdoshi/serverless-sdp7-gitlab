@@ -51,13 +51,6 @@ const Chat = () => {
     console.log("customerId:", customerId);
     // console.log("isAgent:", isAgent);
 
-    // if (!concernId || (!isAgent && userId !== customerId)) {
-    //   console.log("Invalid concernId or user mismatch");
-    //   return;
-    // }
-
-    // if (!concernId || !userId) return; // Skip if concernId or userId is not available
-
     const messagesRef = collection(db, "Concerns", concernId, "messages");
     const unsubscribe = onSnapshot(
       query(messagesRef, orderBy("timestamp", "asc")),

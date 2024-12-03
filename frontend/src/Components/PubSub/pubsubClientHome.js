@@ -32,27 +32,26 @@ import { UserContext } from "../Context/UserContext";
 
 
 const waitForFirestoreDocument = async (referenceId) => {
-  const maxRetries = 10; // Maximum retries for polling
-  const delay = 1000; // Delay in milliseconds between each retry
+  const maxRetries = 10;
+  const delay = 1000;
   let retries = 0;
 
   while (retries < maxRetries) {
     try {
       const q = query(
           collection(db, "Concerns"),
-          where("referenceId", "==", referenceId) // Use "refrenceId" here
+          where("referenceId", "==", referenceId)
       );
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
-        const doc = querySnapshot.docs[0]; // Get the first matching document
-        return doc.id; // Return the Firestore document ID
+        const doc = querySnapshot.docs[0];
+        return doc.id;
       }
     } catch (error) {
       console.error("Error fetching Firestore document:", error);
     }
 
-    // Wait for the delay period before retrying
     await new Promise((resolve) => setTimeout(resolve, delay));
     retries++;
   }
@@ -67,7 +66,6 @@ const PubsubClientHome = () => {
   const { userData } = useContext(UserContext);
   const customerId = localStorage.getItem("userEmail");
   const [concernText, setConcernText] = useState("");
-  // const [refrenceId, setRefrenceId] = useState("");
   const [referenceId, setReferenceId] = useState("");
   const [error, setError] = useState(null);
   const [concerns, setConcerns] = useState([]); // State to hold the concerns data
@@ -76,10 +74,9 @@ const PubsubClientHome = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log("Received customerId:", customerId); // Debugging
+    console.log("Received customerId:", customerId);
   }, [customerId]);
 
-  // Fetch concerns from Firestore
 
   useEffect(() => {
     const fetchDataProcess = async () => {
@@ -143,13 +140,12 @@ const PubsubClientHome = () => {
     try {
       // Prepare the payload for the publishConcern HTTP endpoint
       const payload = {
-        name: userData.name, // Assuming customerId serves as the name
-        email: customerId, // Assuming customer email is the same as ID
-        referenceId: referenceId, // Use "refrenceId" consistently
+        name: userData.name,
+        email: customerId,
+        referenceId: referenceId,
         concernText: concernText,
       };
 
-      // Make a POST request to the publishConcern endpoint
       const response = await axios.post(
           "https://us-central1-serverless-project-439901.cloudfunctions.net/publishConcern",
           payload
@@ -157,15 +153,12 @@ const PubsubClientHome = () => {
 
       console.log("Concern successfully published with message ID:", response.data);
 
-      // Wait for the Firestore document to be created by the subscribe function
       const concernId = await waitForFirestoreDocument(referenceId);
       console.log("Concern ID retrieved:", concernId);
 
-      // Fetch the agent details from Firestore (optional)
       const docSnapshot = await getDoc(doc(db, "Concerns", concernId));
       const concernData = docSnapshot.data();
 
-      // Redirect to the Chat page with the concernId and agentId
       navigate("/chat", {
         state: {
           concernId: concernId,

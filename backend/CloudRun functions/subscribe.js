@@ -9,7 +9,8 @@ const API_GATEWAY_URL = "https://fsywgygjrg.execute-api.us-east-1.amazonaws.com/
 async function fetchAgent() {
   try {
     const response = await axios.get(API_GATEWAY_URL);
-    return response.data;
+    const agentData = JSON.parse(response.data.body);
+    return agentData;
   } catch (error) {
     console.error("Error fetching agent:", error);
     throw new Error("Could not retrieve agent");
@@ -17,22 +18,21 @@ async function fetchAgent() {
 }
 
 functions.cloudEvent('helloPubSub', async (cloudEvent) => {
-  const base64name = cloudEvent.data.message.data;
+  const base64concernData = cloudEvent.data.message.data;
 
-  const name = base64name
-      ? Buffer.from(base64name, 'base64').toString()
+  const concernData = base64concernData
+      ? Buffer.from(base64concernData, 'base64').toString()
       : 'World';
 
-  const data = JSON.parse(name);
+  const data = JSON.parse(concernData);
 
-  console.log(`Hello, ${name}!`);
+  console.log(`Hello, ${concernData}!`);
 
   try {
     const { name, email, referenceId, concernText } = data;
 
     const agentData = await fetchAgent();
 
-    // Firestore reference for the 'Concerns' collection
     const concernRef = firestore.collection('Concerns').doc();
 
     const concernData = {

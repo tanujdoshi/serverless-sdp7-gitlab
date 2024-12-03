@@ -15,7 +15,7 @@ functions.http('helloHttp', async (req, res) => {
         return res.status(400).send('All fields are required.');
       }
 
-      const messagePayload = JSON.stringify({
+      const concernPayload = JSON.stringify({
         name,
         email,
         referenceId,
@@ -23,7 +23,7 @@ functions.http('helloHttp', async (req, res) => {
       });
 
       const topicName = 'projects/serverless-project-439901/topics/raise-concerns';
-      const messageId = await pubsub.topic(topicName).publish(Buffer.from(messagePayload));
+      const messageId = await pubsub.topic(topicName).publish(Buffer.from(concernPayload));
 
       console.log(`Message ${messageId} published.`);
       res.status(200).send(`Concern published with message ID: ${messageId}`);
